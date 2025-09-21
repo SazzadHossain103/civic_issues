@@ -4,6 +4,7 @@ import { Playfair_Display, Source_Sans_3 } from "next/font/google"
 import { Navigation } from "@/components/navigation"
 import "./globals.css"
 
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
@@ -21,7 +22,6 @@ const sourceSans = Source_Sans_3({
 export const metadata: Metadata = {
   title: "CIVIC ISSUES | Civic Issues Bangladesh",
   description: "Report local problems and help improve our community in Bangladesh",
-  generator: "v0.app",
 }
 
 export default function RootLayout({

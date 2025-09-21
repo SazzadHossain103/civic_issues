@@ -48,8 +48,8 @@ const sidebarItems = [
 
 export function AdminSidebar({ activeItem, onItemSelect }: AdminSidebarProps) {
   return (
-    <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
-      <div className="p-6">
+    <div className="w-64 bg-white border-r border-gray-200 min-h-screen ">
+      <div className="p-6 fixed">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Admin Panel</h2>
         <nav className="space-y-2">
           {sidebarItems.map((item) => {

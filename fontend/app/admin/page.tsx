@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,8 @@ import { AdminSidebar } from "@/components/admin-sidebar"
 import { AddUserModal } from "@/components/add-user-modal"
 import { AddAdminModal } from "@/components/add-admin-modal"
 import { EditPermissionsModal } from "@/components/edit-permissions-modal"
+import { AdminNavbar } from "@/components/admin-navbar"
+import { AdminLoginForm } from "@/components/admin-login-form"
 
 // Mock data for admin dashboard
 const mockIssues = [
@@ -170,6 +172,9 @@ const stats = {
 }
 
 export default function AdminDashboard() {
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
+  const [adminUser, setAdminUser] = useState<{ name: string; email: string } | null>(null)
+  const [loginError, setLoginError] = useState("")
   const [issues, setIssues] = useState(mockIssues)
   const [users, setUsers] = useState(mockUsers)
   const [admins, setAdmins] = useState(mockAdmins)
@@ -183,6 +188,38 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [activeView, setActiveView] = useState("dashboard")
+
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminUser")
+    if (savedAdmin) {
+      const adminData = JSON.parse(savedAdmin)
+      setAdminUser(adminData)
+      setIsAdminLoggedIn(true)
+    }
+  }, [])
+
+  const handleAdminLogin = (email: string, password: string) => {
+    // Demo admin credentials
+    if (email === "admin@civicissues.gov.bd" && password === "admin123456") {
+      const adminData = { name: "Mohammad Karim", email }
+      setAdminUser(adminData)
+      setIsAdminLoggedIn(true)
+      setLoginError("")
+      localStorage.setItem("adminUser", JSON.stringify(adminData))
+    } else {
+      setLoginError("Invalid email or password. Please try again.")
+    }
+  }
+
+  const handleAdminLogout = () => {
+    setIsAdminLoggedIn(false)
+    setAdminUser(null)
+    localStorage.removeItem("adminUser")
+  }
+
+  if (!isAdminLoggedIn) {
+    return <AdminLoginForm onLogin={handleAdminLogin} error={loginError} />
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -304,9 +341,9 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">User Management</h3>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => setIsAddUserModalOpen(true)}>
+                  {/* <Button size="sm" onClick={() => setIsAddUserModalOpen(true)}>
                     Add New User
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
 
@@ -609,7 +646,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <AdminNavbar adminName={adminUser?.name || "Admin"} onLogout={handleAdminLogout} />
+
+      <div className="flex flex-1">
       <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />
 
       <div className="flex-1">
@@ -652,6 +692,7 @@ export default function AdminDashboard() {
             onUpdatePermissions={handleUpdatePermissions}
           />
         </div>
+      </div>
       </div>
     </div>
   )

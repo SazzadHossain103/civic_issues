@@ -34,15 +34,15 @@ const issueSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    commnetAt: Date.now,
+    commnetAt: { type: Date, default: Date.now },
   }],
-  officialResponse: {
-    message: String,
-    respondedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
-    },
-    respondedAt: Date.now,
-  },
+  // officialResponse: {
+  //   message: String,
+  //   respondedBy: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Admin",
+  //   },
+  //   respondedAt: { type: Date, default: Date.now },
+  // },
 }, { timestamps: true });
 export const Issue = mongoose.model("Issue", issueSchema);

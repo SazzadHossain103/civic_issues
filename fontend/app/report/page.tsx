@@ -136,7 +136,9 @@ const bangladeshLocations = [
 
 export default function ReportIssuePage() {
   const [currentStep, setCurrentStep] = useState(1)
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
+  // const [selectedImages, setSelectedImages] = useState<string[]>([])
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -146,23 +148,51 @@ export default function ReportIssuePage() {
   const [duplicateIssues, setDuplicateIssues] = useState<typeof existingIssues>([])
   const [showDuplicates, setShowDuplicates] = useState(false)
 
+  // const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = event.target.files
+  //   if (files) {
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader()
+  //       reader.onload = (e) => {
+  //         const result = e.target?.result as string
+  //         setSelectedImages((prev) => [...prev, result])
+  //       }
+  //       reader.readAsDataURL(file)
+  //     })
+  //   }
+  // }
+
+  // const removeImage = (index: number) => {
+  //   setSelectedImages((prev) => prev.filter((_, i) => i !== index))
+  // }
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (files) {
-      Array.from(files).forEach((file) => {
+  const files = event.target.files;
+  if (files) {
+    const fileArray = Array.from(files);
+
+    // store actual files for upload
+    setSelectedImages((prev) => [...prev, ...fileArray]);
+
+    // create previews
+        Array.from(files).forEach((file) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           const result = e.target?.result as string
-          setSelectedImages((prev) => [...prev, result])
+          setPreviewImages((prev) => [...prev, result])
         }
         reader.readAsDataURL(file)
       })
-    }
-  }
+    // const previewArray = fileArray.map((file) => URL.createObjectURL(file));
+    // setPreviewImages((prev) => [...prev, ...previewArray]);
 
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index))
   }
+};
+
+const removeImage = (index: number) => {
+  setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+};
 
   const handleNextStep = () => {
     if (!formData.category || !formData.location) {
@@ -188,14 +218,55 @@ export default function ReportIssuePage() {
     setCurrentStep(2)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log("Form submitted:", formData)
     console.log("Images:", selectedImages)
-    alert("Issue posted successfully! We'll review it shortly.")
-    setCurrentStep(1)
-    setFormData({ title: "", category: "", location: "", description: "" })
-    setSelectedImages([])
+
+    if (selectedImages.length === 0) {
+    alert("Please upload at least one image.");
+    return;
+    }
+
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("category", formData.category);
+    form.append("location", formData.location);
+    form.append("description", formData.description);
+    selectedImages.forEach((file) => {form.append("images", file)});
+
+    console.log(form);
+
+    try {
+    
+    const res = await fetch(`http://localhost:5000/api/issues/add`, {
+      method: "POST",
+      // headers: { "Content-Type": "multipart/form-data" },
+      // body: JSON.stringify(form),
+      body: form,
+
+    });
+
+    if (res.ok) {
+      alert("Post issue successfull");
+    }else{
+      const error = await res.json();
+      alert(error.message || "Failed to post issue.");
+    }
+
+    setCurrentStep(1);
+    setFormData({ title: "", category: "", location: "", description: "" });
+    setSelectedImages([]);
+    setPreviewImages([]);
+  } catch (err) {
+    alert("An error occurred while posting the issue.");
+    console.error(err);
+  }
+
+    // alert("Issue posted successfully! We'll review it shortly.")
+    // setCurrentStep(1)
+    // setFormData({ title: "", category: "", location: "", description: "" })
+    // setSelectedImages([])
   }
 
   return (
@@ -392,11 +463,11 @@ export default function ReportIssuePage() {
                 <div className="space-y-2">
                   <Label htmlFor="photo">Upload Photos *</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6">
-                    {selectedImages.length > 0 ? (
+                    {previewImages.length > 0 ? (
                       <div className="space-y-4">
                         {/* Image Gallery */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {selectedImages.map((image, index) => (
+                          {previewImages.map((image, index) => (
                             <div key={index} className="relative group">
                               <img
                                 src={image || "/placeholder.svg"}
@@ -415,7 +486,7 @@ export default function ReportIssuePage() {
                             </div>
                           ))}
                           {/* Add More Button */}
-                          {selectedImages.length < 5 && (
+                          {previewImages.length < 5 && (
                             <Label htmlFor="photo" className="cursor-pointer">
                               <div className="w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center hover:border-primary transition-colors">
                                 <Plus className="h-6 w-6 text-muted-foreground mb-1" />
@@ -425,7 +496,7 @@ export default function ReportIssuePage() {
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground text-center">
-                          {selectedImages.length}/5 photos uploaded
+                          {previewImages.length}/5 photos uploaded
                         </p>
                       </div>
                     ) : (

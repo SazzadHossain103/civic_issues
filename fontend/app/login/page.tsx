@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useGlobalStore } from "@/components/globalVariable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -17,26 +18,63 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  const { token, isLoggedIn, user, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    // Demo user credentials
-    if (email === "sazzad@gmail.com" && password === "12345678") {
-      // Set user data in localStorage
-      const userData = {
-        email: "sazzad@gmail.com",
-        name: "Sazzad Rahman",
-        id: "user_001",
-      }
-      localStorage.setItem("currentUser", JSON.stringify(userData))
-
-      // Redirect to home page
-      router.push("/")
-    } else {
-      setError("Invalid email or password. Use sazzad@gmail.com / 12345678")
+    // api call backend
+    const userloginData = {
+      email: email,
+      password : password,
     }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userloginData),
+      })
+
+      if (res.ok) {
+        alert("Logged in successfull")
+        const userData = await res.json()
+        console.log("Login Response:", userData)
+        console.log("token : ", userData.data.accessToken)
+        setToken( userData.data.accessToken )
+        setIsLoggedIn(true)
+        setUser( userData.data.user )
+        console.log("isLoggedIn after login : ", isLoggedIn)
+        console.log("user after login : ", user)
+        console.log("token after login : ", token)
+        // Save user info (token or user object) to localStorage
+        localStorage.setItem("currentUser", userData.data.accessToken)
+        router.push("/")
+      } else {
+        const error = await res.json()
+        setError(error.message || "Invalid email or password.")
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.")
+    }
+
+    // Demo user credentials
+    // if (email === "sazzad@gmail.com" && password === "12345678") {
+    //   // Set user data in localStorage
+    //   const userData = {
+    //     email: "sazzad@gmail.com",
+    //     name: "Sazzad Rahman",
+    //     id: "user_001",
+    //   }
+    //   localStorage.setItem("currentUser", JSON.stringify(userData))
+
+    //   // Redirect to home page
+    //   router.push("/")
+    // } else {
+    //   setError("Invalid email or password. Use sazzad@gmail.com / 12345678")
+    // }
 
     setIsLoading(false)
   }

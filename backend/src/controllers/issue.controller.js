@@ -38,7 +38,7 @@ export const postIssue = asyncHandler(async (req, res) => {
     location,
     category,
     priority,
-    // postBy,
+    postBy: req.user._id, // Assuming req.user is populated by verifyJWT middleware
   });
   return res.status(201).json(new ApiResponse(201, issue, "Issue posted successfully"));
 });

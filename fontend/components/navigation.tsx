@@ -9,30 +9,62 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from "next/navigation"
+import { useGlobalStore } from "@/components/globalVariable"
 
 export function Navigation() {
   
   const pathname = usePathname()
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
+  const { token, isLoggedIn, user, logout, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
+  // const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // const [user, setUser] = useState<{ email: string; name: string } | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const isMobile = useIsMobile()
 
-  useEffect(() => {
-    // Check if user is logged in from localStorage
-    const loggedInUser = localStorage.getItem("currentUser")
-    if (loggedInUser) {
-      const userData = JSON.parse(loggedInUser)
-      setUser(userData)
-      setIsLoggedIn(true)
-    }
-  }, [])
+  console.log('navigation isloggedin : ' , isLoggedIn)
+  console.log('navigation user : ' , user)
+  console.log("token from navigation : " , token)
+  // useEffect(() => {
+  //   // Check if user is logged in from localStorage
+  //   const loggedInUser = localStorage.getItem("currentUser")
+  //   console.log("loggedInUser from localStorage:", loggedInUser)
+  //   if (loggedInUser) {
+      
+  //     setIsLoggedIn(true)
+  //     console.log("is logged in" , isLoggedIn )
+  //   }
+  // }, [isLoggedIn])
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser")
-    setUser(null)
-    setIsLoggedIn(false)
+  const handleLogout = async () => {
+    try {
+      // 👇 Call your backend logout API
+      const res = await fetch("http://localhost:5000/api/users/logout", {
+        method: "POST",
+        headers: {
+          // "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // send token if needed
+        },
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Logout failed:", error.message);
+      }
+
+      // ✅ Clear Zustand + localStorage
+      logout();
+      localStorage.removeItem("currentUser")
+      console.log("User logged out successfully");
+      alert("Logged out successfully");
+
+    } catch (err) {
+      console.error("Error during logout:", err);
+    }
+    // setUser(null)
+    // setIsLoggedIn(false)
+    console.log("Logged out, isLoggedIn:", isLoggedIn)
+    // setToken("")
+    console.log("logout token : ", token)
+    console.log("logout user : ", user)
   }
 
   const closeMobileMenu = () => {

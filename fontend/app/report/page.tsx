@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useGlobalStore } from "@/components/globalVariable"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -135,6 +135,7 @@ const bangladeshLocations = [
 ]
 
 export default function ReportIssuePage() {
+  const { token, isLoggedIn,  setToken, setIsLoggedIn } = useGlobalStore();  
   const [currentStep, setCurrentStep] = useState(1)
   // const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -241,7 +242,7 @@ const removeImage = (index: number) => {
     
     const res = await fetch(`http://localhost:5000/api/issues/add`, {
       method: "POST",
-      // headers: { "Content-Type": "multipart/form-data" },
+      headers: {  Authorization: `Bearer ${token}`, },
       // body: JSON.stringify(form),
       body: form,
 
@@ -259,7 +260,7 @@ const removeImage = (index: number) => {
     setSelectedImages([]);
     setPreviewImages([]);
   } catch (err) {
-    alert("An error occurred while posting the issue.");
+    alert("An error occurred while posting the issue must be logged in.");
     console.error(err);
   }
 

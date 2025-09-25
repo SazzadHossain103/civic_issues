@@ -37,7 +37,7 @@ export function Navigation() {
   const handleLogout = async () => {
     try {
       // 👇 Call your backend logout API
-      const res = await fetch("http://localhost:5000/api/users/logout", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/logout`, {
         method: "POST",
         headers: {
           // "Content-Type": "application/json",
@@ -192,6 +192,11 @@ export function Navigation() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuItem disabled>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{user?.fullname || "User"}</span>
+                        </div>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/profile" className="flex items-center">
                           <User className="mr-2 h-4 w-4" />

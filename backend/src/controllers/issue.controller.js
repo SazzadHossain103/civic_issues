@@ -66,14 +66,14 @@ export const deleteIssue = asyncHandler(async (req, res) => {
 
 // Get all issues (optional, useful for listing)
 export const getIssues = asyncHandler(async (req, res) => {
-  const issues = await Issue.find();
+  const issues = await Issue.find().populate('postBy', 'fullname email');
   return res.status(200).json(new ApiResponse(200, issues, "Issues fetched successfully"));
 });
 
 // Get a single issue by ID
 export const getIssueById = asyncHandler(async (req, res) => {
   // const { id } = req.params;
-  const issue = await Issue.findById(req.body.id);
+  const issue = await Issue.findById(req.body.id).populate('postBy', 'fullname email');
   if (!issue) {
     throw new ApiError("Issue not found", 404);
   }

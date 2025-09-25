@@ -239,8 +239,8 @@ const removeImage = (index: number) => {
     console.log(form);
 
     try {
-    
-    const res = await fetch(`http://localhost:5000/api/issues/add`, {
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/add`, {
       method: "POST",
       headers: {  Authorization: `Bearer ${token}`, },
       // body: JSON.stringify(form),

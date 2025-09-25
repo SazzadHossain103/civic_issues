@@ -3,9 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Camera, Users, TrendingUp, AlertTriangle, Zap, Droplets, Trash2 } from "lucide-react"
 import Link from "next/link"
+// import { useState, useEffect } from "react"
+import { Issues } from "@/components/getData"
 
-export default function HomePage() {
-  const recentIssues = [
+export default async function HomePage() {
+
+  const recentIssues = await Issues();
+  console.log("recentIssues from homepage: ", recentIssues)
+
+  // const [recentIssues, setrecentIssues] = useState([])
+  // useEffect(() => {
+  //   const fetehData = async () => {
+  //     const result = await issues();
+  //     setrecentIssues(result);
+  //   }
+  //   fetehData();
+  //   console.log("recentIssues from homepage: ", recentIssues )
+  // }, [recentIssues])
+  const recentIssuesDemo = [
     {
       id: 1,
       title: "Broken Road on Dhanmondi 27",
@@ -124,13 +139,13 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {recentIssues.map((issue) => (
-              <Card key={issue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-video bg-muted">
+            {recentIssues.data && recentIssues.data.slice(0,3).map((issue) => (
+              <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="aspect-video bg-muted ">
                   <img
-                    src={issue.image || "/placeholder.svg"}
+                    src={issue.images[0] || "/placeholder.svg"}
                     alt={issue.title}
-                    className="w-full h-full object-cover"
+                    className="w-full max-h-[220px] object-cover"
                   />
                 </div>
                 <CardHeader>
@@ -145,7 +160,7 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href={`/issue/${issue.id}`}>View Details</Link>
+                    <Link href={`/issue/${issue._id}`}>View Details</Link>
                   </Button>
                 </CardContent>
               </Card>

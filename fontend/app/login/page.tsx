@@ -10,6 +10,9 @@ import { useGlobalStore } from "@/components/globalVariable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import {jwtDecode} from "jwt-decode";
+
+type JwtPayload = { exp: number }
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -43,14 +46,16 @@ export default function LoginPage() {
         const userData = await res.json()
         console.log("Login Response:", userData)
         console.log("token : ", userData.data.accessToken)
-        setToken( userData.data.accessToken )
+        const decoded: JwtPayload = jwtDecode(userData.data.accessToken);
+        const expiryTime = decoded.exp * 1000; // convert to ms
+        setToken(userData.data.accessToken, expiryTime)
         setIsLoggedIn(true)
         setUser( userData.data.user )
         console.log("isLoggedIn after login : ", isLoggedIn)
         console.log("user after login : ", user)
         console.log("token after login : ", token)
         // Save user info (token or user object) to localStorage
-        localStorage.setItem("currentUser", userData.data.accessToken)
+        // localStorage.setItem("currentUser", userData.data.accessToken)
         router.push("/")
       } else {
         const error = await res.json()

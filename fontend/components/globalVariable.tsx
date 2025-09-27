@@ -15,10 +15,11 @@ type User = {
 type GlobalState = {
   user: User | null;
   token: string;
+  tokenExpiry: number | null;  // store expiry timestamp
   isLoggedIn: boolean;
 
   setUser: (user: User | null) => void;
-  setToken: (token: string) => void;
+  setToken: (token: string, expiry: number) => void;
   setIsLoggedIn: (status: boolean) => void;
   logout: () => void;
 };
@@ -28,12 +29,13 @@ export const useGlobalStore = create<GlobalState>()(
     (set) => ({
       user: null,
       token: "",
+      tokenExpiry: null,
       isLoggedIn: false,
 
       setUser: (user) => set({ user, isLoggedIn: !!user }),
-      setToken: (token) => set({ token }),
+      setToken: (token, expiry) => set({ token, tokenExpiry: expiry }),
       setIsLoggedIn: (status) => set({ isLoggedIn: status }),
-      logout: () => set({ user: null, token: "", isLoggedIn: false }),
+      logout: () => set({ user: null, token: "", tokenExpiry: null, isLoggedIn: false }),
     }),
     {
       name: "global-storage", // key in localStorage

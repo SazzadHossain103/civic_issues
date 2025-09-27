@@ -35,6 +35,7 @@ export function Navigation() {
   // }, [isLoggedIn])
 
   const handleLogout = async () => {
+      //  console.log("loggedInUser from localStorage:", localStorage.getItem("currentUser"))
     try {
       // 👇 Call your backend logout API
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/logout`, {
@@ -44,6 +45,11 @@ export function Navigation() {
           Authorization: `Bearer ${token}`, // send token if needed
         },
       });
+      if (res.status === 401) {
+        alert("Login agin")
+        logout(); // auto logout if expired/invalid
+        return;
+      }
 
       if (!res.ok) {
         const error = await res.json();
@@ -52,7 +58,7 @@ export function Navigation() {
 
       // ✅ Clear Zustand + localStorage
       logout();
-      localStorage.removeItem("currentUser")
+      // localStorage.removeItem("currentUser")
       console.log("User logged out successfully");
       alert("Logged out successfully");
 

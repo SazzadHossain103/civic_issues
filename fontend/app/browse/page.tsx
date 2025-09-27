@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Filter, Eye } from "lucide-react"
 import Link from "next/link"
 import { Navigation } from "@/components/navigation"
-import { Issues } from "@/components/getData"
+import { getIssues } from "@/components/getData"
 
 export default function BrowseIssuesPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -19,7 +19,7 @@ export default function BrowseIssuesPage() {
   const [issues, setIssues] = useState([])
   useEffect(() => {
     const fetehData = async () => {
-      const result = await Issues();
+      const result = await getIssues();
       setIssues(result.data);
     }
     fetehData();
@@ -89,7 +89,7 @@ export default function BrowseIssuesPage() {
     },
   ]
 
-  const filteredIssues = issues.filter((issue) => {
+  const filteredIssues = issues.filter((issue: any) => {
     const matchesSearch =
       issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       issue.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -185,7 +185,7 @@ export default function BrowseIssuesPage() {
 
         {/* Issues Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredIssues.map((issue) => (
+          {filteredIssues.map((issue: any) => (
             <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-muted">
                 <img src={issue.images[0] || "/placeholder.svg"} alt={issue.title} className="w-full h-full object-cover" />

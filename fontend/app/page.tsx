@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { MapPin, Camera, Users, TrendingUp, AlertTriangle, Zap, Droplets, Trash2 } from "lucide-react"
 import Link from "next/link"
 // import { useState, useEffect } from "react"
-import { Issues } from "@/components/getData"
+import { getIssues } from "@/components/getData"
 
 export default async function HomePage() {
 
-  const recentIssues = await Issues();
+  const recentIssues = await getIssues();
   console.log("recentIssues from homepage: ", recentIssues)
 
   // const [recentIssues, setrecentIssues] = useState([])
@@ -139,7 +139,7 @@ export default async function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {recentIssues.data && recentIssues.data.slice(0,3).map((issue) => (
+            {recentIssues.data && recentIssues.data.slice(0,3).map((issue: any) => (
               <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video bg-muted ">
                   <img

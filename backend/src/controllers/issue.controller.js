@@ -73,9 +73,98 @@ export const getIssues = asyncHandler(async (req, res) => {
 // Get a single issue by ID
 export const getIssueById = asyncHandler(async (req, res) => {
   // const { id } = req.params;
-  const issue = await Issue.findById(req.body.id).populate('postBy', 'fullname email');
+  const issue = await Issue.findById(req.body.id)
+  .populate('postBy', 'fullname email')
+  .populate('comments.commentBy', 'fullname email');
   if (!issue) {
     throw new ApiError("Issue not found", 404);
   }
   return res.status(200).json(new ApiResponse(200, issue, "Issue fetched successfully"));
+});
+
+// Add a comment to an issue
+export const addComment = asyncHandler(async (req, res) => {
+  const { issueId, message } = req.body;
+  if (!issueId || !message) {
+    throw new ApiError("Issue ID and message are required", 400);
+  }
+
+  const issue = await Issue.findById(issueId);
+  if (!issue) {
+    throw new ApiError("Issue not found", 404);
+  }
+
+  issue.comments.push({
+    message,
+    commentBy: req.user._id, // assuming user is logged in via JWT middleware
+  });
+
+  await issue.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, issue, "Comment added successfully"));
+});
+
+// Delete a comment
+export const deleteComment = asyncHandler(async (req, res) => {
+  const { issueId, commentId } = req.body;
+  if (!issueId || !commentId) {
+    throw new ApiError("Issue ID and comment ID are required", 400);
+  }
+
+  const issue = await Issue.findById(issueId);
+  if (!issue) {
+    throw new ApiError("Issue not found", 404);
+  }
+
+  const comment = issue.comments.id(commentId);
+  if (!comment) {
+    throw new ApiError("Comment not found", 404);
+  }
+
+  // Only allow the owner of the comment to delete
+  if (comment.commentBy.toString() !== req.user._id.toString()) {
+    throw new ApiError("You can only delete your own comments", 403);
+  }
+
+  comment.deleteOne();
+  await issue.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, issue, "Comment deleted successfully"));
+});
+
+
+// Toggle vote for an issue
+export const toggleVote = asyncHandler(async (req, res) => {
+  const { issueId } = req.body;
+  if (!issueId) {
+    throw new ApiError("Issue ID is required", 400);
+  }
+
+  const issue = await Issue.findById(issueId);
+  if (!issue) {
+    throw new ApiError("Issue not found", 404);
+  }
+
+  const userId = req.user._id;
+  const hasVoted = issue.votedBy.includes(userId);
+
+  if (hasVoted) {
+    // Remove vote
+    issue.votes -= 1;
+    issue.votedBy.pull(userId);
+  } else {
+    // Add vote
+    issue.votes += 1;
+    issue.votedBy.push(userId);
+  }
+
+  await issue.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, issue, hasVoted ? "Vote removed" : "Vote added"));
 });

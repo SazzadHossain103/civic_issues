@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+// import type React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,17 +8,36 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, Calendar, User, MessageCircle, ArrowLeft, ThumbsUp, Heart } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { ImageGallery } from "@/components/image-gallery"
+import { getSingleIssues } from "@/components/getData"
+import { useGlobalStore } from "@/components/globalVariable"
+import { useRouter } from "next/navigation";
 
-export default function IssueDetailsPage({ params }: { params: { id: string } }) {
+
+export default function IssueDetailsPage({ params }: { params: Promise<{ id: string }>}) {
+  const {token, user, isLoggedIn } = useGlobalStore()
   const [newComment, setNewComment] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
   const [voteCount, setVoteCount] = useState(23) // Mock initial vote count
+  const { id } = React.use(params);
+  // const { id } = params;
 
+  const [issue, setIssue] = useState<any>([])
+     useEffect(() => {
+      const fetehData = async () => {
+        const result = await getSingleIssues(id);
+        setIssue(result.data);
+      }
+      fetehData();
+    }, [id])
+    console.log("id ", id)
+    console.log("Issue from single: ", issue )
+
+  const [comments, setComments] = useState(issue.comments || []);
   // Mock data - in real app, fetch based on params.id
-  const issue = {
+  const issueD = {
     id: 1,
     title: "Broken Road on Dhanmondi 27",
     category: "Road",
@@ -66,24 +85,140 @@ export default function IssueDetailsPage({ params }: { params: { id: string } })
     ],
   }
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newComment.trim()) {
-      console.log("New comment:", newComment)
-      setNewComment("")
-      // Handle comment submission
-    }
-  }
+  // const handleCommentSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   if (newComment.trim()) {
+  //     console.log("New comment:", newComment)
+  //     setNewComment("")
+  //     // Handle comment submission
+  //   }
+  // }
 
-  const handleVote = () => {
-    if (hasVoted) {
-      setVoteCount((prev) => prev - 1)
-      setHasVoted(false)
-    } else {
-      setVoteCount((prev) => prev + 1)
-      setHasVoted(true)
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newComment.trim()) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/comment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // token from your global store (Zustand or Context)
+        },
+        body: JSON.stringify({
+          issueId: issue._id,   // pass the current issue ID
+          message: newComment,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to post comment");
+      }
+      alert("Commnet successfully")
+      console.log("Comment saved:", data);
+
+      // Update UI (append new comment)
+      // setComments((prev) => [...prev, {
+      //   _id: data.data.comments[data.data.comments.length - 1]._id,
+      //   message: newComment,
+      //   commentBy: { fullname: user.fullname }, // add logged-in user info
+      //   commnetAt: new Date().toISOString(),
+      // }]);
+
+      // Clear input
+      setNewComment("");
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      alert("Could not post comment, please try again.");
     }
-  }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/comment`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // token from your global store (Zustand or Context)
+        },
+        body: JSON.stringify({
+          issueId: issue._id,
+          commentId,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to delete comment");
+      }
+
+      // Remove comment from local state
+      setIssue((prev: any) => ({
+        ...prev,
+        comments: prev.comments.filter((c: any) => c._id !== commentId),
+      }));
+    } catch (error: any) {
+      console.error("Delete comment error:", error.message);
+      alert(error.message);
+    }
+  };
+
+
+
+  // const handleVote = () => {
+  //   if (hasVoted) {
+  //     setVoteCount((prev) => prev - 1)
+  //     setHasVoted(false)
+  //   } else {
+  //     setVoteCount((prev) => prev + 1)
+  //     setHasVoted(true)
+  //   }
+  // }
+
+  useEffect(() => {
+    if (issue) {
+      setVoteCount(issue.votes);
+      setHasVoted(user ? issue?.votedBy?.includes(user._id) : false);
+    }
+  }, [issue, user]);
+
+  const router = useRouter();
+
+  const handleVote = async () => {
+    if (!isLoggedIn || !user) {
+    alert("Please log in to vote.");
+    router.push("/login"); // redirect to login page
+    return;
+    }
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // from Zustand/global store
+        },
+        body: JSON.stringify({ issueId: issue._id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to toggle vote");
+      }
+
+      // The backend returns the updated issue with votes + votedBy
+      setVoteCount(data.data.votes);
+      setHasVoted(user ? data.data.votedBy.includes(user._id) : false);
+    } catch (error) {
+      console.error("Vote error:", error);
+      alert("Could not register vote. Please try again.");
+    }
+  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,11 +254,11 @@ export default function IssueDetailsPage({ params }: { params: { id: string } })
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
-                    {issue.postedBy}
+                    {issue.postBy && issue.postBy?.fullname}
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
-                    {issue.postedDate}
+                    {issue.postDate?.split("T")[0]}
                   </div>
                   <Badge variant="outline">{issue.category}</Badge>
                 </div>
@@ -187,7 +322,7 @@ export default function IssueDetailsPage({ params }: { params: { id: string } })
                 <MapPin className="h-5 w-5 mr-2" />
                 <h3 className="font-semibold mb-2">Map </ h3>
               </div>
-              <div className="bg-muted rounded-lg p-8 text-center">
+              <div className="bg-muted rounded-lg text-center">
                 <iframe
                   title="Google Map"
                   width="100%"
@@ -209,30 +344,36 @@ export default function IssueDetailsPage({ params }: { params: { id: string } })
           <CardHeader>
             <CardTitle className="flex items-center">
               <MessageCircle className="mr-2 h-5 w-5" />
-              Comments & Updates ({issue.comments.length})
+              Comments & Updates ({issue?.comments?.length})
             </CardTitle>
             <CardDescription>Track progress and join the discussion about this issue</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Existing Comments */}
             <div className="space-y-4">
-              {issue.comments.map((comment) => (
-                <div key={comment.id} className="flex space-x-3">
+              {issue.comments && issue.comments.map((comment: any) => (
+                <div key={comment._id} className="flex space-x-3">
                   <Avatar>
                     <AvatarImage src={comment.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                    <AvatarFallback>{comment.commentBy.fullname[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold">{comment.author}</span>
+                      <span className="font-semibold">{comment.commentBy.fullname}</span>
                       {comment.isOfficial && (
                         <Badge variant="secondary" className="text-xs">
                           Official
                         </Badge>
                       )}
-                      <span className="text-sm text-muted-foreground">{comment.date}</span>
+                      <span className="text-sm text-muted-foreground">{comment.commnetAt.split("T")[0]}</span>
+                      <button
+                        className="ml-auto text-red-500 text-sm hover:underline"
+                        onClick={() => handleDeleteComment(comment._id)}
+                      >
+                        Delete
+                      </button>
                     </div>
-                    <p className="text-muted-foreground">{comment.content}</p>
+                    <p className="text-muted-foreground">{comment.message}</p>
                   </div>
                 </div>
               ))}

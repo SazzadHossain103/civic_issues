@@ -17,9 +17,11 @@ app.use(cookieParser()); // Parse cookies from incoming requests
 // Import routes
 import userRouter from './routes/user.router.js';
 import issueRouter from './routes/issue.router.js';
+import adminRouter from './routes/admin.routes.js';
 
 // Use routes 
 app.use('/api/users', userRouter);
+app.use('/api/admins', adminRouter);
 app.use('/api/issues', issueRouter);
 
 export {app};// Note: Make sure to set the CORS_ORIGIN environment variable in your .env file

@@ -141,3 +141,11 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 export { registerUser, loginUser, logoutUser };
+
+// Get all users 
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select("-password -refreshToken"); // exclude password
+  return res
+    .status(200)
+    .json(new ApiResponse(200, users, "users fetched successfully"));
+});

@@ -20,9 +20,9 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     role: "Moderator",
     department: "",
-    status: "active",
     permissions: [] as string[],
   })
 
@@ -37,7 +37,7 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
       lastActive: new Date().toISOString().split("T")[0],
     }
     onAddAdmin(newAdmin)
-    setFormData({ name: "", email: "", role: "Moderator", department: "", status: "active", permissions: [] })
+    setFormData({ name: "", email: "", password: "", role: "Moderator", department: "", permissions: [] })
     onClose()
   }
 
@@ -78,6 +78,17 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="Enter email address"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="passwprd">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              placeholder="Enter password"
               required
             />
           </div>

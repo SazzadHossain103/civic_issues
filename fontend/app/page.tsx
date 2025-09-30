@@ -139,7 +139,10 @@ export default async function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {recentIssues.data && recentIssues.data.slice(0,3).map((issue: any) => (
+            {recentIssues.data && recentIssues.data
+            .sort((a: any, b: any) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime())
+            .slice(0,3)
+            .map((issue: any) => (
               <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video bg-muted ">
                   <img

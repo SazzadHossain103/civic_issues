@@ -14,6 +14,12 @@ import { AddAdminModal } from "@/components/add-admin-modal"
 import { EditPermissionsModal } from "@/components/edit-permissions-modal"
 import { AdminNavbar } from "@/components/admin-navbar"
 import { AdminLoginForm } from "@/components/admin-login-form"
+import { useGlobalStore } from "@/components/globalVariable"
+import { getIssues, getUsers } from "@/components/getData"
+import {jwtDecode} from "jwt-decode";
+
+type JwtPayload = { exp: number };
+
 
 // Mock data for admin dashboard
 const mockIssues = [
@@ -171,15 +177,15 @@ const stats = {
   totalUsers: 1247,
 }
 
-export default function AdminDashboard() {
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
+export default function AdaminDashboard() {
+  // const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [adminUser, setAdminUser] = useState<{ name: string; email: string } | null>(null)
   const [loginError, setLoginError] = useState("")
-  const [issues, setIssues] = useState(mockIssues)
-  const [users, setUsers] = useState(mockUsers)
-  const [admins, setAdmins] = useState(mockAdmins)
-  const [selectedIssue, setSelectedIssue] = useState(null)
-  const [selectedAdmin, setSelectedAdmin] = useState(null)
+  const [issues, setIssues] = useState<any[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [admins, setAdmins] = useState<any[]>([])
+  const [selectedIssue, setSelectedIssue] = useState<any>(null)
+  const [selectedAdmin, setSelectedAdmin] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false)
   const [isAddAdminModalOpen, setIsAddAdminModalOpen] = useState(false)
@@ -189,33 +195,137 @@ export default function AdminDashboard() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [activeView, setActiveView] = useState("dashboard")
 
+
+  const { adminToken, adminTokenExpiry, isAdminLoggedIn, admin, adminlogout, setAdmin,  setAdminToken, setIsAdminLoggedIn } = useGlobalStore();
+
   useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminUser")
-    if (savedAdmin) {
-      const adminData = JSON.parse(savedAdmin)
-      setAdminUser(adminData)
-      setIsAdminLoggedIn(true)
+    if (adminTokenExpiry && Date.now() > adminTokenExpiry) {
+      adminlogout();
     }
-  }, [])
+  }, [adminTokenExpiry, adminlogout]);
 
-  const handleAdminLogin = (email: string, password: string) => {
-    // Demo admin credentials
-    if (email === "admin@civicissues.gov.bd" && password === "admin123456") {
-      const adminData = { name: "Mohammad Karim", email }
-      setAdminUser(adminData)
-      setIsAdminLoggedIn(true)
-      setLoginError("")
-      localStorage.setItem("adminUser", JSON.stringify(adminData))
-    } else {
-      setLoginError("Invalid email or password. Please try again.")
+ 
+  useEffect(() => {
+    const fetehData = async () => {
+      const resissues = await getIssues();
+      setIssues(resissues.data);
+      const resusers = await getUsers();
+      setUsers(resusers.data);
+
+      try{
+        const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/list`, { 
+        method: "GET",
+        headers: { Authorization: `Bearer ${adminToken}`, },
+        next: { revalidate: 10 } });
+
+        if (!result.ok) {
+          throw new Error("Failed to fetch issue");
+        }
+        console.log("admins fetch ok")
+        const data = await result.json();
+        setAdmins(data.data);
+      }
+      catch(error){
+        console.log("admins fetch error ", error)
+      }
     }
-  }
+    fetehData();
+    console.log("Admins from admin: ", admins )
+  }, [adminToken])
 
-  const handleAdminLogout = () => {
-    setIsAdminLoggedIn(false)
-    setAdminUser(null)
-    localStorage.removeItem("adminUser")
-  }
+  // useEffect(() => {
+  //   const savedAdmin = localStorage.getItem("adminUser")
+  //   if (savedAdmin) {
+  //     const adminData = JSON.parse(savedAdmin)
+  //     setAdminToken(adminData.token)
+  //     setAdminUser(adminData.admin)
+  //     setIsAdminLoggedIn(true)
+  //   }
+  // }, [adminUser])
+
+  console.log("current admin : ", admin)
+
+  // const handleAdminLogin = (email: string, password: string) => {
+  //   // Demo admin credentials
+  //   if (email === "admin@civicissues.gov.bd" && password === "admin123456") {
+  //     const adminData = { name: "Mohammad Karim", email }
+  //     setAdminUser(adminData)
+  //     setIsAdminLoggedIn(true)
+  //     setLoginError("")
+  //     localStorage.setItem("adminUser", JSON.stringify(adminData))
+  //   } else {
+  //     setLoginError("Invalid email or password. Please try again.")
+  //   }
+  // }
+
+  
+
+  const handleAdminLogin = async (email: string, password: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log("Login failed");
+        alert("Login failed");
+        setLoginError(data.message || "Login failed");
+        return;
+      }
+      alert("Logged in successfully");
+
+      const decoded: JwtPayload = jwtDecode(data.data.token);
+      const expiryTime = decoded.exp * 1000; // convert to ms
+
+      setAdminToken(data.data.token, expiryTime);
+      const adminData = data.data.admin;
+      setAdmin(adminData);
+      setIsAdminLoggedIn(true);
+      setLoginError("");
+
+      // optional: keep in localStorage if you want
+      // localStorage.setItem("adminUser", JSON.stringify(adminData));
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginError("Something went wrong. Try again.");
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.log("Logout failed");
+      }
+      alert("Logout successfully");
+
+      // setIsAdminLoggedIn(false);
+      // setAdmin(null);
+      adminlogout();
+      // localStorage.removeItem("adminUser");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+
+  // const handleAdminLogout = () => {
+  //   setIsAdminLoggedIn(false)
+  //   setAdminUser(null)
+  //   localStorage.removeItem("adminUser")
+  // }
 
   if (!isAdminLoggedIn) {
     return <AdminLoginForm onLogin={handleAdminLogin} error={loginError} />
@@ -273,9 +383,37 @@ export default function AdminDashboard() {
     setUsers((prev) => prev.filter((user) => user.id !== userId))
   }
 
-  const handleAddAdmin = (adminData: any) => {
-    setAdmins((prev) => [...prev, adminData])
-  }
+  // const handleAddAdmin = (adminData: any) => {
+  //   setAdmins((prev) => [...prev, adminData])
+  // }
+  console.log("admin token : " , adminToken)
+  const handleAddAdmin = async (adminData: any) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify(adminData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to add admin");
+      }
+
+      // Add the new admin to state
+      setAdmins((prev) => [...prev, data.data]);
+
+      console.log("Admin added successfully:", data.data);
+    } catch (error: any) {
+      console.log("Error adding admin:", error.message);
+      alert(error.message);
+    }
+  };
+
 
   const handleDeleteAdmin = (adminId: number) => {
     setAdmins((prev) => prev.filter((admin) => admin.id !== adminId))
@@ -304,8 +442,8 @@ export default function AdminDashboard() {
           const matchesSearch =
             issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             issue.location.toLowerCase().includes(searchTerm.toLowerCase())
-          const matchesStatus = statusFilter === "all" || issue.status === statusFilter
-          const matchesPriority = priorityFilter === "all" || issue.priority === priorityFilter
+          const matchesStatus = statusFilter === "all" || issue.status.toLowerCase() === statusFilter
+          const matchesPriority = priorityFilter === "all" || issue.priority.toLowerCase() === priorityFilter
           return matchesSearch && matchesStatus && matchesPriority
         })
     }
@@ -348,12 +486,12 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {users.map((user) => (
-                  <Card key={user.id} className="border border-gray-200">
+                {users.map((user,index) => (
+                  <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{user.name}</h4>
+                          <h4 className="font-semibold text-gray-900">{user.fullname}</h4>
                           <p className="text-sm text-gray-600">{user.email}</p>
                         </div>
                         <Badge className={getStatusColor(user.status)} variant="secondary">
@@ -366,14 +504,14 @@ export default function AdminDashboard() {
                           <strong>Location:</strong> {user.location}
                         </p>
                         <p>
-                          <strong>Issues Reported:</strong> {user.issuesReported}
+                          <strong>Issues Reported:</strong> {issues.filter((issue) => issue.postBy._id === user._id).length}
                         </p>
                         <p>
-                          <strong>Joined:</strong> {user.joinDate}
+                          <strong>Joined:</strong> {user.createdAt.split("T")[0]}
                         </p>
-                        <p>
+                        {/* <p>
                           <strong>Last Active:</strong> {user.lastActive}
-                        </p>
+                        </p> */}
                       </div>
 
                       <div className="flex gap-2 mt-4">
@@ -405,44 +543,44 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">Admin Management</h3>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
+                  {admin?.role === "Super Admin" && <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
                     Add New Admin
-                  </Button>
+                  </Button>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {admins.map((admin) => (
-                  <Card key={admin.id} className="border border-gray-200">
+                {admins && admins.map((item,index) => (
+                  <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{admin.name}</h4>
-                          <p className="text-sm text-gray-600">{admin.email}</p>
+                          <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                          <p className="text-sm text-gray-600">{item.email}</p>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <Badge className={getStatusColor(admin.status)} variant="secondary">
-                            {admin.status}
+                          <Badge className={getStatusColor(item.status)} variant="secondary">
+                            {item.status}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
-                            {admin.role}
+                            {item.role}
                           </Badge>
                         </div>
                       </div>
 
                       <div className="space-y-2 text-sm text-gray-600">
                         <p>
-                          <strong>Department:</strong> {admin.department}
+                          <strong>Department:</strong> {item.department}
                         </p>
                         <p>
-                          <strong>Permissions:</strong> {admin.permissions.join(", ")}
+                          <strong>Permissions:</strong> {item.permissions.join(", ")}
                         </p>
                         <p>
-                          <strong>Joined:</strong> {admin.joinDate}
+                          <strong>Joined:</strong> {item.createdAt.split("T")[0]}
                         </p>
-                        <p>
-                          <strong>Last Active:</strong> {admin.lastActive}
-                        </p>
+                        {/* <p>
+                          <strong>Last Active:</strong> {item.updatedAt}
+                        </p> */}
                       </div>
 
                       <div className="flex gap-2 mt-4">
@@ -450,11 +588,11 @@ export default function AdminDashboard() {
                           size="sm"
                           variant="outline"
                           className="flex-1 bg-transparent"
-                          onClick={() => handleEditPermissions(admin)}
+                          onClick={() => handleEditPermissions(item)}
                         >
                           Edit Permissions
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(admin.id)}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -581,7 +719,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold text-gray-900">Issues Management</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getFilteredIssuesByView().map((issue) => (
-              <Card key={issue.id} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Card key={issue._id} className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-semibold text-gray-900 line-clamp-2">{issue.title}</h3>
@@ -603,10 +741,10 @@ export default function AdminDashboard() {
                       <strong>Location:</strong> {issue.location}
                     </p>
                     <p>
-                      <strong>Reported by:</strong> {issue.reportedBy}
+                      <strong>Reported by:</strong> {issue.postBy.fullname}
                     </p>
                     <p>
-                      <strong>Date:</strong> {issue.reportedDate}
+                      <strong>Date:</strong> {issue.postDate.split("T")[0]}
                     </p>
                   </div>
 
@@ -617,7 +755,7 @@ export default function AdminDashboard() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
-                      {issue.comments} comments
+                      {issue.comments.length} comments
                     </span>
                   </div>
 
@@ -625,7 +763,7 @@ export default function AdminDashboard() {
                     <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1">
                       View Details
                     </Button>
-                    <Select value={issue.status} onValueChange={(value) => updateIssueStatus(issue.id, value)}>
+                    <Select value={issue.status.toLowerCase()} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -647,7 +785,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <AdminNavbar adminName={adminUser?.name || "Admin"} onLogout={handleAdminLogout} />
+      <AdminNavbar adminName={admin?.name || "Admin"} onLogout={handleAdminLogout} />
 
       <div className="flex flex-1">
       <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />

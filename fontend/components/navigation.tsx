@@ -14,7 +14,7 @@ import { useGlobalStore } from "@/components/globalVariable"
 export function Navigation() {
   
   const pathname = usePathname()
-  const { token, isLoggedIn, user, logout, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
+  const { token, tokenExpiry, isLoggedIn, user, logout, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
   // const [isLoggedIn, setIsLoggedIn] = useState(false)
   // const [user, setUser] = useState<{ email: string; name: string } | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -33,6 +33,11 @@ export function Navigation() {
   //     console.log("is logged in" , isLoggedIn )
   //   }
   // }, [isLoggedIn])
+  useEffect(() => {
+    if (tokenExpiry && Date.now() > tokenExpiry) {
+      logout();
+    }
+  }, [tokenExpiry, logout]);
 
   const handleLogout = async () => {
       //  console.log("loggedInUser from localStorage:", localStorage.getItem("currentUser"))

@@ -46,14 +46,18 @@ export default function LoginPage() {
         const userData = await res.json()
         console.log("Login Response:", userData)
         console.log("token : ", userData.data.accessToken)
+        
         const decoded: JwtPayload = jwtDecode(userData.data.accessToken);
         const expiryTime = decoded.exp * 1000; // convert to ms
+
         setToken(userData.data.accessToken, expiryTime)
         setIsLoggedIn(true)
         setUser( userData.data.user )
+
         console.log("isLoggedIn after login : ", isLoggedIn)
         console.log("user after login : ", user)
         console.log("token after login : ", token)
+
         // Save user info (token or user object) to localStorage
         // localStorage.setItem("currentUser", userData.data.accessToken)
         router.push("/")

@@ -1,5 +1,5 @@
 "use client"
-
+import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,7 +16,7 @@ import { AdminNavbar } from "@/components/admin-navbar"
 import { AdminLoginForm } from "@/components/admin-login-form"
 import { useGlobalStore } from "@/components/globalVariable"
 import { getIssues, getUsers } from "@/components/getData"
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = { exp: number };
 
@@ -179,7 +179,7 @@ const stats = {
 
 export default function AdaminDashboard() {
   // const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
-  const [adminUser, setAdminUser] = useState<{ name: string; email: string } | null>(null)
+  // const [adminUser, setAdminUser] = useState<{ name: string; email: string } | null>(null)
   const [loginError, setLoginError] = useState("")
   const [issues, setIssues] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -206,7 +206,7 @@ export default function AdaminDashboard() {
 
  
   useEffect(() => {
-    const fetehData = async () => {
+    const fetchData = async () => {
       const resissues = await getIssues();
       setIssues(resissues.data);
       const resusers = await getUsers();
@@ -229,7 +229,7 @@ export default function AdaminDashboard() {
         console.log("admins fetch error ", error)
       }
     }
-    fetehData();
+    fetchData();
     console.log("Admins from admin: ", admins )
   }, [adminToken])
 
@@ -361,8 +361,13 @@ export default function AdaminDashboard() {
     }
   }
 
-  const updateIssueStatus = (issueId: number, newStatus: string) => {
-    setIssues(issues.map((issue) => (issue.id === issueId ? { ...issue, status: newStatus } : issue)))
+  const updateIssueStatus = (issueId: string, newStatus: string) => {
+    setIssues(issues.map((issue) => (issue._id === issueId ? { ...issue, status: newStatus } : issue)))
+    
+    // Update selectedIssue if it matches the updated issue
+    if (selectedIssue && selectedIssue._id === issueId) {
+      setSelectedIssue({ ...selectedIssue, status: newStatus })
+    }
   }
 
   const handleViewDetails = (issue: any) => {
@@ -415,13 +420,78 @@ export default function AdaminDashboard() {
   };
 
 
-  const handleDeleteAdmin = (adminId: number) => {
-    setAdmins((prev) => prev.filter((admin) => admin.id !== adminId))
-  }
+  // const handleDeleteAdmin = (adminId: number) => {
+  //   setAdmins((prev) => prev.filter((admin) => admin.id !== adminId))
+  // }
+  const handleDeleteAdmin = async (adminId: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/delete`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ id: adminId }),
+      });
 
-  const handleUpdatePermissions = (adminId: number, permissions: string[]) => {
-    setAdmins((prev) => prev.map((admin) => (admin.id === adminId ? { ...admin, permissions } : admin)))
-  }
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to delete admin");
+      }
+
+      // Update state after successful delete
+      setAdmins((prev) => prev.filter((admin) => admin._id !== adminId));
+
+      console.log("Admin deleted successfully");
+      alert("Admin deleted successfully");
+    } catch (error: any) {
+      console.error("Error deleting admin:", error.message);
+      alert(error.message);
+    }
+  };
+
+
+  // const handleUpdatePermissions = (adminId: string, role: string, department: string, permissions: string[]) => {
+  //   setAdmins((prev) =>
+  //     prev.map((admin) => (admin._id === adminId ? { ...admin, role, department, permissions } : admin)),
+  //   )
+  // }
+
+  const handleUpdatePermissions = async (
+    adminId: string,
+    role: string,
+    department: string,
+    permissions: string[]
+  ) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ id: adminId, role, department, permissions }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update admin permissions");
+      }
+
+      // Update state with fresh data from backend
+      setAdmins((prev) =>
+        prev.map((admin) =>
+          admin._id === adminId ? { ...admin, role, department, permissions } : admin
+        )
+      );
+
+      console.log("Permissions updated:", data.data);
+      alert("Permissions updated successfully")
+    } catch (error: any) {
+      console.error("Error updating permissions:", error.message);
+      alert(error.message);
+    }
+  };
+
 
   const handleEditPermissions = (admin: any) => {
     setSelectedAdmin(admin)
@@ -431,11 +501,11 @@ export default function AdaminDashboard() {
   const getFilteredIssuesByView = () => {
     switch (activeView) {
       case "pending-issues":
-        return issues.filter((issue) => issue.status === "pending")
+        return issues.filter((issue) => issue.status.toLowerCase() === "pending")
       case "in-progress":
-        return issues.filter((issue) => issue.status === "in-progress")
+        return issues.filter((issue) => issue.status.toLowerCase() === "in-progress")
       case "resolved":
-        return issues.filter((issue) => issue.status === "resolved")
+        return issues.filter((issue) => issue.status.toLowerCase() === "resolved")
       case "total-issues":
       default:
         return issues.filter((issue) => {
@@ -555,7 +625,7 @@ export default function AdaminDashboard() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                          <h4 className="font-semibold text-gray-900">{item.fullname}</h4>
                           <p className="text-sm text-gray-600">{item.email}</p>
                         </div>
                         <div className="flex flex-col gap-1">
@@ -583,7 +653,7 @@ export default function AdaminDashboard() {
                         </p> */}
                       </div>
 
-                      <div className="flex gap-2 mt-4">
+                      {admin?.role === "Super Admin" && <div className="flex gap-2 mt-4">
                         <Button
                           size="sm"
                           variant="outline"
@@ -592,10 +662,10 @@ export default function AdaminDashboard() {
                         >
                           Edit Permissions
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item.id)}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item._id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
+                      </div>}
                     </CardContent>
                   </Card>
                 ))}
@@ -785,7 +855,7 @@ export default function AdaminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <AdminNavbar adminName={admin?.name || "Admin"} onLogout={handleAdminLogout} />
+      <AdminNavbar adminName={admin?.fullname || "Admin"} onLogout={handleAdminLogout} />
 
       <div className="flex flex-1">
       <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />

@@ -48,17 +48,17 @@ export default async function HomePage() {
   ]
 
   const stats = [
-    { label: "Total Reports", value: "1,247", icon: AlertTriangle },
-    { label: "Resolved Issues", value: "892", icon: TrendingUp },
-    { label: "Active Users", value: "3,456", icon: Users },
+    { label: "Total Reports", value: recentIssues.data.length, icon: AlertTriangle },
+    { label: "Resolved Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'resolved').length , icon: TrendingUp },
+    { label: "In progress Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'in-progress').length, icon: Users },
     { label: "Cities Covered", value: "64", icon: MapPin },
   ]
 
   const categories = [
-    { name: "Road Issues", icon: AlertTriangle, count: 324, color: "bg-red-100 text-red-700" },
-    { name: "Electricity", icon: Zap, count: 198, color: "bg-yellow-100 text-yellow-700" },
-    { name: "Water Supply", icon: Droplets, count: 156, color: "bg-blue-100 text-blue-700" },
-    { name: "Waste Management", icon: Trash2, count: 89, color: "bg-green-100 text-green-700" },
+    { name: "Road Issues", icon: AlertTriangle, count: recentIssues.data.filter((issue:any)=> issue.category === 'road').length , color: "bg-red-100 text-red-700" },
+    { name: "Electricity", icon: Zap, count: recentIssues.data.filter((issue:any)=> issue.category === 'electricity').length, color: "bg-yellow-100 text-yellow-700" },
+    { name: "Water Supply", icon: Droplets, count: recentIssues.data.filter((issue:any)=> issue.category === 'water').length, color: "bg-blue-100 text-blue-700" },
+    { name: "Waste Management", icon: Trash2, count: recentIssues.data.filter((issue:any)=> issue.category === 'waste').length, color: "bg-green-100 text-green-700" },
   ]
 
   return (

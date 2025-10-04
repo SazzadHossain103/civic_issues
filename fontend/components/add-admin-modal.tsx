@@ -18,7 +18,7 @@ interface AddAdminModalProps {
 
 export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
+    fullname: "",
     email: "",
     password: "",
     role: "Moderator",
@@ -27,6 +27,20 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
   })
 
   const availablePermissions = ["view", "edit", "respond", "moderate", "all"]
+
+  const departments = [
+    "IT Administration",
+    "Dhaka Division",
+    "Chittagong Division",
+    "Rajshahi Division",
+    "Khulna Division",
+    "Sylhet Division",
+    "Road & Highways",
+    "Water & Sanitation",
+    "Electricity & Power",
+    "Content Moderation",
+    "Central Administration",
+  ]
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +51,7 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
       lastActive: new Date().toISOString().split("T")[0],
     }
     onAddAdmin(newAdmin)
-    setFormData({ name: "", email: "", password: "", role: "Moderator", department: "", permissions: [] })
+    setFormData({ fullname: "", email: "", password: "", role: "Moderator", department: "", permissions: [] })
     onClose()
   }
 
@@ -60,11 +74,11 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="fullname">Full Name</Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
+              id="fullname"
+              value={formData.fullname}
+              onChange={(e) => handleInputChange("fullname", e.target.value)}
               placeholder="Enter full name"
               required
             />
@@ -110,13 +124,18 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
 
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
-            <Input
-              id="department"
-              value={formData.department}
-              onChange={(e) => handleInputChange("department", e.target.value)}
-              placeholder="e.g., IT Administration"
-              required
-            />
+            <Select value={formData.department} onValueChange={(value) => handleInputChange("department", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

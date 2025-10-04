@@ -22,6 +22,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
   const [hasVoted, setHasVoted] = useState(false)
   const [voteCount, setVoteCount] = useState(23) // Mock initial vote count
   const { id } = React.use(params);
+  const router = useRouter();
   // const { id } = params;
 
   const [issue, setIssue] = useState<any>([])
@@ -35,7 +36,13 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
     console.log("id ", id)
     console.log("Issue from single: ", issue )
 
-  const [comments, setComments] = useState(issue.comments || []);
+  const [comments, setComments] = useState<any[]>([]);
+  useEffect(() => {
+    if (issue?.comments) {
+      setComments(issue.comments);
+    }
+  }, [issue]);
+
   // Mock data - in real app, fetch based on params.id
   const issueD = {
     id: 1,
@@ -97,6 +104,12 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!isLoggedIn || !user) {
+    alert("Please login to comment.");
+    router.push("/login"); // redirect to login page
+    return;
+    }
+
     if (!newComment.trim()) return;
 
     try {
@@ -121,12 +134,12 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
       console.log("Comment saved:", data);
 
       // Update UI (append new comment)
-      // setComments((prev) => [...prev, {
-      //   _id: data.data.comments[data.data.comments.length - 1]._id,
-      //   message: newComment,
-      //   commentBy: { fullname: user.fullname }, // add logged-in user info
-      //   commnetAt: new Date().toISOString(),
-      // }]);
+      setComments((prev:any) => [...prev, {
+        _id: data.data.comments[data.data.comments.length - 1]._id,
+        message: newComment,
+        commentBy: { fullname: user.fullname }, // add logged-in user info
+        commentAt: new Date().toISOString(),
+      }]);
 
       // Clear input
       setNewComment("");
@@ -137,6 +150,11 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
   };
 
   const handleDeleteComment = async (commentId: string) => {
+    if (!isLoggedIn || !user) {
+    alert("Please login to delete comment.");
+    router.push("/login"); // redirect to login page
+    return;
+    }
     if (!window.confirm("Are you sure you want to delete this comment?")) return;
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/comment`, {
@@ -186,7 +204,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
     }
   }, [issue, user]);
 
-  const router = useRouter();
+  
 
   const handleVote = async () => {
     if (!isLoggedIn || !user) {
@@ -344,18 +362,18 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
           <CardHeader>
             <CardTitle className="flex items-center">
               <MessageCircle className="mr-2 h-5 w-5" />
-              Comments & Updates ({issue?.comments?.length})
+              Comments & Updates ({comments?.length})
             </CardTitle>
             <CardDescription>Track progress and join the discussion about this issue</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Existing Comments */}
             <div className="space-y-4">
-              {issue.comments && issue.comments.map((comment: any) => (
+              {comments && comments.map((comment: any) => (
                 <div key={comment._id} className="flex space-x-3">
                   <Avatar>
-                    <AvatarImage src={comment.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>{comment.commentBy.fullname[0]}</AvatarFallback>
+                    <AvatarImage src={comment?.avatar || "/placeholder.svg"} />
+                    {/* <AvatarFallback>{comment.commentBy.fullname[0]}</AvatarFallback> */}
                   </Avatar>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center space-x-2">
@@ -365,7 +383,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                           Official
                         </Badge>
                       )}
-                      <span className="text-sm text-muted-foreground">{comment.commnetAt.split("T")[0]}</span>
+                      <span className="text-sm text-muted-foreground">{comment.commentAt.split("T")[0]}</span>
                       <button
                         className="ml-auto text-red-500 text-sm hover:underline"
                         onClick={() => handleDeleteComment(comment._id)}

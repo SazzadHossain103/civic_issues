@@ -14,9 +14,9 @@ const generateToken = (adminId) => {
 
 // Add new Admin (only Super Admin can do this)
 export const addAdmin = asyncHandler(async (req, res) => {
-  const { name, email, role, status, department, permissions, password } = req.body;
+  const { fullname, email, role, status, department, permissions, password } = req.body;
 
-  if (!name || !email || !role || !department || !password) {
+  if (!fullname || !email || !role || !department || !password) {
     throw new ApiError("All fields are required", 400);
   }
 
@@ -28,7 +28,7 @@ export const addAdmin = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const admin = await Admin.create({
-    name,
+    fullname,
     email,
     role,
     status,
@@ -102,7 +102,7 @@ export const deleteAdmin = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Admin deleted successfully"));
 });
 
-// Get all admins (Super Admin only)
+// Get all admins 
 export const getAllAdmins = asyncHandler(async (req, res) => {
   const admins = await Admin.find().select("-password"); // exclude password
   return res

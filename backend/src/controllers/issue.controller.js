@@ -66,7 +66,9 @@ export const deleteIssue = asyncHandler(async (req, res) => {
 
 // Get all issues (optional, useful for listing)
 export const getIssues = asyncHandler(async (req, res) => {
-  const issues = await Issue.find().populate('postBy', 'fullname email');
+  const issues = await Issue.find()
+  .populate('postBy', 'fullname email')
+  .populate('comments.commentBy', 'fullname email');
   return res.status(200).json(new ApiResponse(200, issues, "Issues fetched successfully"));
 });
 
@@ -94,9 +96,13 @@ export const addComment = asyncHandler(async (req, res) => {
     throw new ApiError("Issue not found", 404);
   }
 
+  const onModel = req.user.role === "User" ? "User" : "Admin";
+
   issue.comments.push({
     message,
     commentBy: req.user._id, // assuming user is logged in via JWT middleware
+    onModel,
+    isOfficial: onModel === "Admin",
   });
 
   await issue.save();

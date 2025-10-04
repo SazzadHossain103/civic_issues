@@ -14,7 +14,7 @@ type User = {
 
 type Admin = {
   _id: string;
-  name: string;
+  fullname: string;
   email: string;
   role: string;
 }

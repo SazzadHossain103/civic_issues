@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
   //   ref: "Issue",
   // }],
   password: { type: String, required: [true, 'password is  required'] },
+  role: { 
+    type: String, 
+    default: "User",
+  },
   refreshToken: { type: String }
 },{ timestamps: true });
 

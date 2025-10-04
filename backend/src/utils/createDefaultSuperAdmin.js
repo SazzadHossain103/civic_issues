@@ -9,7 +9,7 @@ export const createDefaultSuperAdmin = async () => {
       const hashedPassword = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD , 10);
 
       await Admin.create({
-        name: process.env.SUPER_ADMIN_NAME ,
+        fullname: process.env.SUPER_ADMIN_NAME ,
         email: process.env.SUPER_ADMIN_EMAIL ,
         role: "Super Admin",
         department: "Central Administration",

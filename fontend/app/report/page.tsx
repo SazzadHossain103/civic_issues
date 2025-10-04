@@ -25,6 +25,8 @@ import {
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Navigation } from "@/components/navigation"
+import { useRouter } from "next/navigation";
+import { getIssues } from "@/components/getData"
 
 const existingIssues = [
   {
@@ -146,8 +148,18 @@ export default function ReportIssuePage() {
     location: "",
     description: "",
   })
-  const [duplicateIssues, setDuplicateIssues] = useState<typeof existingIssues>([])
+  const [duplicateIssues, setDuplicateIssues] = useState<any[]>([])
   const [showDuplicates, setShowDuplicates] = useState(false)
+  const router = useRouter();
+
+  // const [recentIssues, setrecentIssues] = useState([])
+    useEffect(() => {
+      const fetehData = async () => {
+        const result = await getIssues();
+        setDuplicateIssues(result.data);
+      }
+      fetehData();
+    }, [])
 
   // const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   const files = event.target.files
@@ -201,7 +213,7 @@ const removeImage = (index: number) => {
       return
     }
 
-    const duplicates = existingIssues.filter(
+    const duplicates = duplicateIssues.filter(
       (issue) => issue.category === formData.category && issue.location === formData.location,
     )
 
@@ -221,6 +233,11 @@ const removeImage = (index: number) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isLoggedIn || !token) {
+    alert("Please login to post.");
+    router.push("/login"); // redirect to login page
+    return;
+    }
     console.log("Form submitted:", formData)
     console.log("Images:", selectedImages)
 
@@ -375,11 +392,11 @@ const removeImage = (index: number) => {
 
               <div className="space-y-4 mb-6">
                 {duplicateIssues.map((issue) => (
-                  <Card key={issue.id} className="border-orange-200">
+                  <Card key={issue._id} className="border-orange-200">
                     <CardContent className="p-4">
                       <div className="flex gap-4">
                         <img
-                          src={issue.image || "/placeholder.svg"}
+                          src={issue.images[0] || "/placeholder.svg"}
                           alt={issue.title}
                           className="w-20 h-20 object-cover rounded-lg"
                         />
@@ -390,11 +407,11 @@ const removeImage = (index: number) => {
                           <div className="flex items-center gap-4 text-xs mb-2">
                             <span className="flex items-center gap-1">
                               <ThumbsUp className="h-3 w-3" />
-                              {issue.likes} votes
+                              {issue.votes} votes
                             </span>
                             <span className="flex items-center gap-1">
                               <MessageCircle className="h-3 w-3" />
-                              {issue.comments} comments
+                              {issue.comments.length} comments
                             </span>
                             <span
                               className={`px-2 py-1 rounded-full text-xs ${
@@ -409,7 +426,7 @@ const removeImage = (index: number) => {
                             </span>
                           </div>
                           <Button size="sm" variant="outline" asChild>
-                            <Link href={`/issue/${issue.id}`}>
+                            <Link href={`/issue/${issue._id}`}>
                               <Eye className="h-3 w-3 mr-1" />
                               View & Vote
                             </Link>

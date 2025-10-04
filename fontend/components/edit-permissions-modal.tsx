@@ -7,21 +7,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface EditPermissionsModalProps {
   isOpen: boolean
   onClose: () => void
   admin: any
-  onUpdatePermissions: (adminId: number, permissions: string[]) => void
+  onUpdatePermissions: (adminId: string, role: string, department: string, permissions: string[]) => void
 }
 
 export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissions }: EditPermissionsModalProps) {
+  const [selectedRole, setSelectedRole] = useState("")
+  const [selectedDepartment, setSelectedDepartment] = useState("")
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
 
   const availablePermissions = ["view", "edit", "respond", "moderate", "all"]
 
+  const availableRoles = ["Super Admin", "Regional Admin", "Department Admin", "Moderator"]
+
+  const availableDepartments = [
+    "IT Administration",
+    "Dhaka Division",
+    "Chittagong Division",
+    "Rajshahi Division",
+    "Khulna Division",
+    "Sylhet Division",
+    "Road & Highways",
+    "Water & Sanitation",
+    "Electricity & Power",
+    "Content Moderation",
+    "Central Administration",
+  ]
+
   useEffect(() => {
     if (admin) {
+      setSelectedRole(admin.role || "")
+      setSelectedDepartment(admin.department || "")
       setSelectedPermissions(admin.permissions || [])
     }
   }, [admin])
@@ -29,7 +50,7 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (admin) {
-      onUpdatePermissions(admin.id, selectedPermissions)
+      onUpdatePermissions(admin._id, selectedRole, selectedDepartment, selectedPermissions)
     }
     onClose()
   }
@@ -44,12 +65,39 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Permissions - {admin.name}</DialogTitle>
+          <DialogTitle>Edit Admin Details - {admin.name}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Current Role: {admin.role}</Label>
-            <Label>Department: {admin.department}</Label>
+            <Label htmlFor="role">Role</Label>
+            <Select value={selectedRole} onValueChange={setSelectedRole}>
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="department">Department</Label>
+            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+              <SelectTrigger id="department">
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDepartments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -75,7 +123,7 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              Update Permissions
+              Update Admin
             </Button>
           </div>
         </form>

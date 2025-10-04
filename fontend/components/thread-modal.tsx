@@ -10,28 +10,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MessageSquare, Calendar, User, Send } from "lucide-react"
 import { useState } from "react"
 
-interface Comment {
-  id: number
-  author: string
-  avatar: string
-  date: string
-  content: string
-  isOfficial: boolean
+interface UserRef {
+  _id: string
+  fullname: string
+  email: string
 }
 
-interface Issue {
-  id: number
-  title: string
-  category: string
-  location: string
-  status: string
-  priority: string
-  reportedBy: string
-  reportedDate: string
-  votes: number
-  comments: number
-  description: string
+interface Comment {
+  _id: string
+  message: string
+  commentBy: UserRef
+  commnetAt: string   // ISO date string
+  avatar?: string
+  isOfficial?: boolean
 }
+
+
+interface Issue {
+  _id: string
+  title: string
+  description: string
+  images: string[]
+  location: string
+  category: string
+  priority: string
+  status: string
+  votes: number
+  votedBy: UserRef[]
+  postDate: string       // ISO date string
+  postBy: UserRef
+  comments: Comment[]
+  createdAt: string
+  updatedAt: string
+}
+
 
 interface ThreadModalProps {
   issue: Issue | null
@@ -40,90 +52,90 @@ interface ThreadModalProps {
 }
 
 // Mock comments data - in real app, this would be fetched based on issue ID
-const mockComments: Comment[] = [
-  {
-    id: 1,
-    author: "Ahmed Hassan",
-    avatar: "/placeholder.svg?height=40&width=40&text=AH",
-    date: "2024-01-15 10:30 AM",
-    content:
-      "I reported this issue because it's becoming a serious safety hazard. The potholes are getting deeper every day, especially after the recent rains.",
-    isOfficial: false,
-  },
-  {
-    id: 2,
-    author: "City Council",
-    avatar: "/placeholder.svg?height=40&width=40&text=CC",
-    date: "2024-01-15 2:45 PM",
-    content:
-      "Thank you for reporting this issue. We have received your complaint and forwarded it to the Roads and Highways Department for immediate attention.",
-    isOfficial: true,
-  },
-  {
-    id: 3,
-    author: "Fatima Khan",
-    avatar: "/placeholder.svg?height=40&width=40&text=FK",
-    date: "2024-01-16 8:15 AM",
-    content:
-      "I live nearby and can confirm this is a major problem. My car got damaged last week because of these potholes. When will this be fixed?",
-    isOfficial: false,
-  },
-  {
-    id: 4,
-    author: "Roads Department",
-    avatar: "/placeholder.svg?height=40&width=40&text=RD",
-    date: "2024-01-16 11:20 AM",
-    content:
-      "Our inspection team has been dispatched to assess the damage. We expect to begin repair work within 48-72 hours. Thank you for your patience.",
-    isOfficial: true,
-  },
-  {
-    id: 5,
-    author: "Rahman Ali",
-    avatar: "/placeholder.svg?height=40&width=40&text=RA",
-    date: "2024-01-17 9:00 AM",
-    content:
-      "Any update on when the repair work will start? The situation is getting worse with more traffic avoiding this route.",
-    isOfficial: false,
-  },
-  {
-    id: 6,
-    author: "Roads Department",
-    avatar: "/placeholder.svg?height=40&width=40&text=RD",
-    date: "2024-01-17 3:30 PM",
-    content:
-      "Update: Repair work will commence on January 20th at 6:00 AM. The work is expected to be completed within 3 days. We will ensure minimal traffic disruption.",
-    isOfficial: true,
-  },
-  {
-    id: 7,
-    author: "Local Resident",
-    avatar: "/placeholder.svg?height=40&width=40&text=LR",
-    date: "2024-01-18 7:45 AM",
-    content:
-      "Great to see quick response from the authorities. Hope the repair work is done properly this time so we don't face the same issue again.",
-    isOfficial: false,
-  },
-]
+// const mockComments: Comment[] = [
+//   {
+//     id: 1,
+//     author: "Ahmed Hassan",
+//     avatar: "/placeholder.svg?height=40&width=40&text=AH",
+//     date: "2024-01-15 10:30 AM",
+//     content:
+//       "I reported this issue because it's becoming a serious safety hazard. The potholes are getting deeper every day, especially after the recent rains.",
+//     isOfficial: false,
+//   },
+//   {
+//     id: 2,
+//     author: "City Council",
+//     avatar: "/placeholder.svg?height=40&width=40&text=CC",
+//     date: "2024-01-15 2:45 PM",
+//     content:
+//       "Thank you for reporting this issue. We have received your complaint and forwarded it to the Roads and Highways Department for immediate attention.",
+//     isOfficial: true,
+//   },
+//   {
+//     id: 3,
+//     author: "Fatima Khan",
+//     avatar: "/placeholder.svg?height=40&width=40&text=FK",
+//     date: "2024-01-16 8:15 AM",
+//     content:
+//       "I live nearby and can confirm this is a major problem. My car got damaged last week because of these potholes. When will this be fixed?",
+//     isOfficial: false,
+//   },
+//   {
+//     id: 4,
+//     author: "Roads Department",
+//     avatar: "/placeholder.svg?height=40&width=40&text=RD",
+//     date: "2024-01-16 11:20 AM",
+//     content:
+//       "Our inspection team has been dispatched to assess the damage. We expect to begin repair work within 48-72 hours. Thank you for your patience.",
+//     isOfficial: true,
+//   },
+//   {
+//     id: 5,
+//     author: "Rahman Ali",
+//     avatar: "/placeholder.svg?height=40&width=40&text=RA",
+//     date: "2024-01-17 9:00 AM",
+//     content:
+//       "Any update on when the repair work will start? The situation is getting worse with more traffic avoiding this route.",
+//     isOfficial: false,
+//   },
+//   {
+//     id: 6,
+//     author: "Roads Department",
+//     avatar: "/placeholder.svg?height=40&width=40&text=RD",
+//     date: "2024-01-17 3:30 PM",
+//     content:
+//       "Update: Repair work will commence on January 20th at 6:00 AM. The work is expected to be completed within 3 days. We will ensure minimal traffic disruption.",
+//     isOfficial: true,
+//   },
+//   {
+//     id: 7,
+//     author: "Local Resident",
+//     avatar: "/placeholder.svg?height=40&width=40&text=LR",
+//     date: "2024-01-18 7:45 AM",
+//     content:
+//       "Great to see quick response from the authorities. Hope the repair work is done properly this time so we don't face the same issue again.",
+//     isOfficial: false,
+//   },
+// ]
 
 export function ThreadModal({ issue, isOpen, onClose }: ThreadModalProps) {
   const [newComment, setNewComment] = useState("")
-  const [comments, setComments] = useState(mockComments)
+  const [comments, setComments] = useState<any[]>(issue?.comments ?? [])
 
   if (!issue) return null
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (newComment.trim()) {
-      const comment: Comment = {
-        id: comments.length + 1,
-        author: "Admin User", // In real app, get from auth context
-        avatar: "/placeholder.svg?height=40&width=40&text=AU",
-        date: new Date().toLocaleString(),
-        content: newComment,
-        isOfficial: true, // Admin comments are official
-      }
-      setComments([...comments, comment])
+      // const comment: Comment = {
+      //   id: comments.length + 1,
+      //   author: "Admin User", // In real app, get from auth context
+      //   avatar: "/placeholder.svg?height=40&width=40&text=AU",
+      //   date: new Date().toLocaleString(),
+      //   content: newComment,
+      //   isOfficial: true, // Admin comments are official
+      // }
+      // setComments([...comments, comment])
       setNewComment("")
     }
   }
@@ -136,7 +148,7 @@ export function ThreadModal({ issue, isOpen, onClose }: ThreadModalProps) {
             <MessageSquare className="h-5 w-5" />
             Full Thread: {issue.title}
           </DialogTitle>
-          <DialogDescription>Complete conversation history for Issue #{issue.id}</DialogDescription>
+          <DialogDescription>Complete conversation history for Issue #{issue._id}</DialogDescription>
         </DialogHeader>
 
         {/* Thread Content - Scrollable */}
@@ -150,11 +162,11 @@ export function ThreadModal({ issue, isOpen, onClose }: ThreadModalProps) {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="font-semibold text-blue-900">{issue.reportedBy}</span>
+                  <span className="font-semibold text-blue-900">{issue.postBy.fullname}</span>
                   <Badge variant="outline" className="text-xs">
                     Original Post
                   </Badge>
-                  <span className="text-sm text-blue-600">{issue.reportedDate}</span>
+                  <span className="text-sm text-blue-600">{issue.postDate.split("T")[0]}</span>
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-medium text-blue-900">{issue.title}</h4>
@@ -176,34 +188,36 @@ export function ThreadModal({ issue, isOpen, onClose }: ThreadModalProps) {
 
           {/* Comments Thread */}
           <div className="space-y-4">
-            {comments.map((comment, index) => (
-              <div key={comment.id} className="flex items-start gap-3">
+            {comments && comments.map((comment, index) => (
+              <div key={index} className="flex items-start gap-3">
                 <Avatar>
                   <AvatarImage src={comment.avatar || "/placeholder.svg"} />
                   <AvatarFallback>
-                    {comment.author
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                    {(comment.commentBy?.fullname
+                      ? comment.commentBy.fullname
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                      : "NA")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-900">{comment.author}</span>
-                    {comment.isOfficial && (
+                    <span className="font-semibold text-gray-900">{comment.commentBy.fullname || "saxxd"}</span>
+                    {/* {comment.isOfficial && (
                       <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
                         Official Response
                       </Badge>
-                    )}
-                    <span className="text-sm text-gray-500">{comment.date}</span>
+                    )} */}
+                    <span className="text-sm text-gray-500">{comment.commnetAt.split("T")[0]}</span>
                   </div>
                   <div
                     className={`p-3 rounded-lg ${
-                      comment.isOfficial ? "bg-green-50 border border-green-200" : "bg-gray-50 border border-gray-200"
+                      comment.isOfficial && comment.isOfficial ? "bg-green-50 border border-green-200" : "bg-gray-50 border border-gray-200"
                     }`}
                   >
                     <p className={`text-sm ${comment.isOfficial ? "text-green-800" : "text-gray-700"}`}>
-                      {comment.content}
+                      {comment.message}
                     </p>
                   </div>
                 </div>

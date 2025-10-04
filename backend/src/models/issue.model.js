@@ -32,17 +32,15 @@ const issueSchema = new mongoose.Schema({
     message: String,
     commentBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      // ref: "User",
+      refPath: "comments.onModel",
     },
-    commnetAt: { type: Date, default: Date.now },
+    onModel: {
+      type: String,
+      enum: ["User", "Admin"],
+    },
+    isOfficial: { type: Boolean, default: false },
+    commentAt: { type: Date, default: Date.now },
   }],
-  // officialResponse: {
-  //   message: String,
-  //   respondedBy: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Admin",
-  //   },
-  //   respondedAt: { type: Date, default: Date.now },
-  // },
 }, { timestamps: true });
 export const Issue = mongoose.model("Issue", issueSchema);

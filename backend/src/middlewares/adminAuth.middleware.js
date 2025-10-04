@@ -16,7 +16,7 @@ export const verifyAdminJWT = asyncHandler(async (req, res, next) => {
       throw new ApiError("Admin not found", 404);
     }
 
-    req.admin = admin; // attach admin info
+    req.user = admin; // attach admin info
     next();
   } catch (error) {
     throw new ApiError("Unauthorized: Invalid token", 401);

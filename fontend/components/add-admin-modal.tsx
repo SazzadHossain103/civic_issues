@@ -18,16 +18,25 @@ interface AddAdminModalProps {
 
 export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProps) {
   const [formData, setFormData] = useState({
+<<<<<<< HEAD
     fullname: "",
     email: "",
     password: "",
     role: "Moderator",
     department: "",
+=======
+    name: "",
+    email: "",
+    role: "Moderator",
+    department: "",
+    status: "active",
+>>>>>>> main
     permissions: [] as string[],
   })
 
   const availablePermissions = ["view", "edit", "respond", "moderate", "all"]
 
+<<<<<<< HEAD
   const departments = [
     "IT Administration",
     "Dhaka Division",
@@ -42,6 +51,8 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
     "Central Administration",
   ]
 
+=======
+>>>>>>> main
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newAdmin = {
@@ -51,7 +62,11 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
       lastActive: new Date().toISOString().split("T")[0],
     }
     onAddAdmin(newAdmin)
+<<<<<<< HEAD
     setFormData({ fullname: "", email: "", password: "", role: "Moderator", department: "", permissions: [] })
+=======
+    setFormData({ name: "", email: "", role: "Moderator", department: "", status: "active", permissions: [] })
+>>>>>>> main
     onClose()
   }
 
@@ -74,11 +89,19 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+<<<<<<< HEAD
             <Label htmlFor="fullname">Full Name</Label>
             <Input
               id="fullname"
               value={formData.fullname}
               onChange={(e) => handleInputChange("fullname", e.target.value)}
+=======
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+>>>>>>> main
               placeholder="Enter full name"
               required
             />
@@ -95,6 +118,7 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
               required
             />
           </div>
+<<<<<<< HEAD
           <div className="space-y-2">
             <Label htmlFor="passwprd">Password</Label>
             <Input
@@ -106,6 +130,8 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
               required
             />
           </div>
+=======
+>>>>>>> main
 
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
@@ -124,6 +150,7 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
 
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
+<<<<<<< HEAD
             <Select value={formData.department} onValueChange={(value) => handleInputChange("department", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select department" />
@@ -136,6 +163,15 @@ export function AddAdminModal({ isOpen, onClose, onAddAdmin }: AddAdminModalProp
                 ))}
               </SelectContent>
             </Select>
+=======
+            <Input
+              id="department"
+              value={formData.department}
+              onChange={(e) => handleInputChange("department", e.target.value)}
+              placeholder="e.g., IT Administration"
+              required
+            />
+>>>>>>> main
           </div>
 
           <div className="space-y-2">

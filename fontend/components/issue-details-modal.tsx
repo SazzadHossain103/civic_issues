@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+<<<<<<< HEAD
 import { Eye, MessageSquare, MapPin, Calendar, User, Send } from "lucide-react"
 import { ThreadModal } from "./thread-modal"
 import { useState, useEffect } from "react"
@@ -46,15 +47,40 @@ interface Issue {
 }
 
 
+=======
+import { Eye, MessageSquare, MapPin, Calendar, User } from "lucide-react"
+import { ThreadModal } from "./thread-modal"
+import { useState } from "react"
+
+interface Issue {
+  id: number
+  title: string
+  category: string
+  location: string
+  status: string
+  priority: string
+  reportedBy: string
+  reportedDate: string
+  votes: number
+  comments: number
+  description: string
+}
+
+>>>>>>> main
 interface IssueDetailsModalProps {
   issue: Issue | null
   isOpen: boolean
   onClose: () => void
+<<<<<<< HEAD
   onStatusUpdate: (issueId: string, newStatus: string) => void
+=======
+  onStatusUpdate: (issueId: number, newStatus: string) => void
+>>>>>>> main
 }
 
 export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: IssueDetailsModalProps) {
   const [isThreadModalOpen, setIsThreadModalOpen] = useState(false)
+<<<<<<< HEAD
   const { adminToken, admin }  = useGlobalStore();
   const [newComment, setNewComment] = useState("")
   const [comments, setComments] = useState<any[]>([]);
@@ -108,6 +134,11 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
       alert("Could not post comment, please try again.");
     }
   }
+=======
+
+  if (!issue) return null
+
+>>>>>>> main
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -141,7 +172,11 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">{issue.title}</DialogTitle>
             <DialogDescription>
+<<<<<<< HEAD
               Issue ID: #{issue._id} • Reported on {issue.postDate.split("T")[0]}
+=======
+              Issue ID: #{issue.id} • Reported on {issue.reportedDate}
+>>>>>>> main
             </DialogDescription>
           </DialogHeader>
 
@@ -173,7 +208,11 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
                   <User className="h-4 w-4 text-gray-500" />
                   <div>
                     <p className="text-sm font-medium text-gray-500">Reported By</p>
+<<<<<<< HEAD
                     <p className="text-gray-900">{issue.postBy.fullname}</p>
+=======
+                    <p className="text-gray-900">{issue.reportedBy}</p>
+>>>>>>> main
                   </div>
                 </div>
               </div>
@@ -194,7 +233,11 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
                   </span>
                   <span className="flex items-center gap-1">
                     <MessageSquare className="h-4 w-4" />
+<<<<<<< HEAD
                     {issue.comments.length} comments
+=======
+                    {issue.comments} comments
+>>>>>>> main
                   </span>
                 </div>
               </div>
@@ -204,7 +247,11 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
             <div className="border-t pt-4">
               <h3 className="font-semibold mb-3">Update Status</h3>
               <div className="flex gap-3">
+<<<<<<< HEAD
                 <Select value={issue.status.toLowerCase()} onValueChange={(value) => onStatusUpdate(issue._id, value)}>
+=======
+                <Select value={issue.status} onValueChange={(value) => onStatusUpdate(issue.id, value)}>
+>>>>>>> main
                   <SelectTrigger className="w-40">
                     <SelectValue />
                   </SelectTrigger>
@@ -218,6 +265,7 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Comments Thread */}
           <div className="space-y-4">
             <h3 className="font-semibold mb-3">Comments </h3>
@@ -297,6 +345,10 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
 
             {/* Official Response Section */}
             {/* <div className="border-t pt-4">
+=======
+            {/* Official Response Section */}
+            <div className="border-t pt-4">
+>>>>>>> main
               <h3 className="font-semibold mb-3">Official Response</h3>
               <Textarea placeholder="Add an official response to this issue..." className="min-h-24 mb-3" />
               <div className="flex gap-2">
@@ -305,14 +357,22 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
                   View Full Thread
                 </Button>
               </div>
+<<<<<<< HEAD
             </div> */}
+=======
+            </div>
+>>>>>>> main
           </div>
         </DialogContent>
       </Dialog>
 
       {/* ThreadModal component */}
+<<<<<<< HEAD
       {/* <ThreadModal issue={issue} isOpen={isThreadModalOpen} onClose={() => setIsThreadModalOpen(false)} /> */}
     
+=======
+      <ThreadModal issue={issue} isOpen={isThreadModalOpen} onClose={() => setIsThreadModalOpen(false)} />
+>>>>>>> main
     </>
   )
 }

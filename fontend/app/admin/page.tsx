@@ -1,6 +1,11 @@
 "use client"
+<<<<<<< HEAD
 import type React from "react"
 import { useState, useEffect } from "react"
+=======
+
+import { useState } from "react"
+>>>>>>> main
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +17,7 @@ import { AdminSidebar } from "@/components/admin-sidebar"
 import { AddUserModal } from "@/components/add-user-modal"
 import { AddAdminModal } from "@/components/add-admin-modal"
 import { EditPermissionsModal } from "@/components/edit-permissions-modal"
+<<<<<<< HEAD
 import { AdminNavbar } from "@/components/admin-navbar"
 import { AdminLoginForm } from "@/components/admin-login-form"
 import { useGlobalStore } from "@/components/globalVariable"
@@ -20,6 +26,8 @@ import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = { exp: number };
 
+=======
+>>>>>>> main
 
 // Mock data for admin dashboard
 const mockIssues = [
@@ -177,6 +185,7 @@ const stats = {
   totalUsers: 1247,
 }
 
+<<<<<<< HEAD
 export default function AdaminDashboard() {
   // const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   // const [adminUser, setAdminUser] = useState<{ name: string; email: string } | null>(null)
@@ -186,6 +195,14 @@ export default function AdaminDashboard() {
   const [admins, setAdmins] = useState<any[]>([])
   const [selectedIssue, setSelectedIssue] = useState<any>(null)
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null)
+=======
+export default function AdminDashboard() {
+  const [issues, setIssues] = useState(mockIssues)
+  const [users, setUsers] = useState(mockUsers)
+  const [admins, setAdmins] = useState(mockAdmins)
+  const [selectedIssue, setSelectedIssue] = useState(null)
+  const [selectedAdmin, setSelectedAdmin] = useState(null)
+>>>>>>> main
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false)
   const [isAddAdminModalOpen, setIsAddAdminModalOpen] = useState(false)
@@ -195,6 +212,7 @@ export default function AdaminDashboard() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [activeView, setActiveView] = useState("dashboard")
 
+<<<<<<< HEAD
 
   const { adminToken, adminTokenExpiry, isAdminLoggedIn, admin, adminlogout, setAdmin,  setAdminToken, setIsAdminLoggedIn } = useGlobalStore();
 
@@ -331,6 +349,8 @@ export default function AdaminDashboard() {
     return <AdminLoginForm onLogin={handleAdminLogin} error={loginError} />
   }
 
+=======
+>>>>>>> main
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -361,6 +381,7 @@ export default function AdaminDashboard() {
     }
   }
 
+<<<<<<< HEAD
   const updateIssueStatus = (issueId: string, newStatus: string) => {
     setIssues(issues.map((issue) => (issue._id === issueId ? { ...issue, status: newStatus } : issue)))
     
@@ -368,6 +389,10 @@ export default function AdaminDashboard() {
     if (selectedIssue && selectedIssue._id === issueId) {
       setSelectedIssue({ ...selectedIssue, status: newStatus })
     }
+=======
+  const updateIssueStatus = (issueId: number, newStatus: string) => {
+    setIssues(issues.map((issue) => (issue.id === issueId ? { ...issue, status: newStatus } : issue)))
+>>>>>>> main
   }
 
   const handleViewDetails = (issue: any) => {
@@ -388,6 +413,7 @@ export default function AdaminDashboard() {
     setUsers((prev) => prev.filter((user) => user.id !== userId))
   }
 
+<<<<<<< HEAD
   // const handleAddAdmin = (adminData: any) => {
   //   setAdmins((prev) => [...prev, adminData])
   // }
@@ -492,6 +518,19 @@ export default function AdaminDashboard() {
     }
   };
 
+=======
+  const handleAddAdmin = (adminData: any) => {
+    setAdmins((prev) => [...prev, adminData])
+  }
+
+  const handleDeleteAdmin = (adminId: number) => {
+    setAdmins((prev) => prev.filter((admin) => admin.id !== adminId))
+  }
+
+  const handleUpdatePermissions = (adminId: number, permissions: string[]) => {
+    setAdmins((prev) => prev.map((admin) => (admin.id === adminId ? { ...admin, permissions } : admin)))
+  }
+>>>>>>> main
 
   const handleEditPermissions = (admin: any) => {
     setSelectedAdmin(admin)
@@ -501,19 +540,32 @@ export default function AdaminDashboard() {
   const getFilteredIssuesByView = () => {
     switch (activeView) {
       case "pending-issues":
+<<<<<<< HEAD
         return issues.filter((issue) => issue.status.toLowerCase() === "pending")
       case "in-progress":
         return issues.filter((issue) => issue.status.toLowerCase() === "in-progress")
       case "resolved":
         return issues.filter((issue) => issue.status.toLowerCase() === "resolved")
+=======
+        return issues.filter((issue) => issue.status === "pending")
+      case "in-progress":
+        return issues.filter((issue) => issue.status === "in-progress")
+      case "resolved":
+        return issues.filter((issue) => issue.status === "resolved")
+>>>>>>> main
       case "total-issues":
       default:
         return issues.filter((issue) => {
           const matchesSearch =
             issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             issue.location.toLowerCase().includes(searchTerm.toLowerCase())
+<<<<<<< HEAD
           const matchesStatus = statusFilter === "all" || issue.status.toLowerCase() === statusFilter
           const matchesPriority = priorityFilter === "all" || issue.priority.toLowerCase() === priorityFilter
+=======
+          const matchesStatus = statusFilter === "all" || issue.status === statusFilter
+          const matchesPriority = priorityFilter === "all" || issue.priority === priorityFilter
+>>>>>>> main
           return matchesSearch && matchesStatus && matchesPriority
         })
     }
@@ -549,19 +601,34 @@ export default function AdaminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">User Management</h3>
                 <div className="flex gap-2">
+<<<<<<< HEAD
                   {/* <Button size="sm" onClick={() => setIsAddUserModalOpen(true)}>
                     Add New User
                   </Button> */}
+=======
+                  <Button size="sm" onClick={() => setIsAddUserModalOpen(true)}>
+                    Add New User
+                  </Button>
+>>>>>>> main
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<<<<<<< HEAD
                 {users.map((user,index) => (
                   <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h4 className="font-semibold text-gray-900">{user.fullname}</h4>
+=======
+                {users.map((user) => (
+                  <Card key={user.id} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{user.name}</h4>
+>>>>>>> main
                           <p className="text-sm text-gray-600">{user.email}</p>
                         </div>
                         <Badge className={getStatusColor(user.status)} variant="secondary">
@@ -574,6 +641,7 @@ export default function AdaminDashboard() {
                           <strong>Location:</strong> {user.location}
                         </p>
                         <p>
+<<<<<<< HEAD
                           <strong>Issues Reported:</strong> {issues.filter((issue) => issue.postBy._id === user._id).length}
                         </p>
                         <p>
@@ -582,6 +650,16 @@ export default function AdaminDashboard() {
                         {/* <p>
                           <strong>Last Active:</strong> {user.lastActive}
                         </p> */}
+=======
+                          <strong>Issues Reported:</strong> {user.issuesReported}
+                        </p>
+                        <p>
+                          <strong>Joined:</strong> {user.joinDate}
+                        </p>
+                        <p>
+                          <strong>Last Active:</strong> {user.lastActive}
+                        </p>
+>>>>>>> main
                       </div>
 
                       <div className="flex gap-2 mt-4">
@@ -613,13 +691,20 @@ export default function AdaminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">Admin Management</h3>
                 <div className="flex gap-2">
+<<<<<<< HEAD
                   {admin?.role === "Super Admin" && <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
                     Add New Admin
                   </Button>}
+=======
+                  <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
+                    Add New Admin
+                  </Button>
+>>>>>>> main
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<<<<<<< HEAD
                 {admins && admins.map((item,index) => (
                   <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
@@ -634,12 +719,29 @@ export default function AdaminDashboard() {
                           </Badge>
                           <Badge variant="outline" className="text-xs">
                             {item.role}
+=======
+                {admins.map((admin) => (
+                  <Card key={admin.id} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{admin.name}</h4>
+                          <p className="text-sm text-gray-600">{admin.email}</p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={getStatusColor(admin.status)} variant="secondary">
+                            {admin.status}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {admin.role}
+>>>>>>> main
                           </Badge>
                         </div>
                       </div>
 
                       <div className="space-y-2 text-sm text-gray-600">
                         <p>
+<<<<<<< HEAD
                           <strong>Department:</strong> {item.department}
                         </p>
                         <p>
@@ -654,10 +756,27 @@ export default function AdaminDashboard() {
                       </div>
 
                       {admin?.role === "Super Admin" && <div className="flex gap-2 mt-4">
+=======
+                          <strong>Department:</strong> {admin.department}
+                        </p>
+                        <p>
+                          <strong>Permissions:</strong> {admin.permissions.join(", ")}
+                        </p>
+                        <p>
+                          <strong>Joined:</strong> {admin.joinDate}
+                        </p>
+                        <p>
+                          <strong>Last Active:</strong> {admin.lastActive}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+>>>>>>> main
                         <Button
                           size="sm"
                           variant="outline"
                           className="flex-1 bg-transparent"
+<<<<<<< HEAD
                           onClick={() => handleEditPermissions(item)}
                         >
                           Edit Permissions
@@ -666,6 +785,16 @@ export default function AdaminDashboard() {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>}
+=======
+                          onClick={() => handleEditPermissions(admin)}
+                        >
+                          Edit Permissions
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(admin.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+>>>>>>> main
                     </CardContent>
                   </Card>
                 ))}
@@ -789,7 +918,11 @@ export default function AdaminDashboard() {
           <h2 className="text-xl font-semibold text-gray-900">Issues Management</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getFilteredIssuesByView().map((issue) => (
+<<<<<<< HEAD
               <Card key={issue._id} className="cursor-pointer hover:shadow-md transition-shadow">
+=======
+              <Card key={issue.id} className="cursor-pointer hover:shadow-md transition-shadow">
+>>>>>>> main
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-semibold text-gray-900 line-clamp-2">{issue.title}</h3>
@@ -811,10 +944,17 @@ export default function AdaminDashboard() {
                       <strong>Location:</strong> {issue.location}
                     </p>
                     <p>
+<<<<<<< HEAD
                       <strong>Reported by:</strong> {issue.postBy.fullname}
                     </p>
                     <p>
                       <strong>Date:</strong> {issue.postDate.split("T")[0]}
+=======
+                      <strong>Reported by:</strong> {issue.reportedBy}
+                    </p>
+                    <p>
+                      <strong>Date:</strong> {issue.reportedDate}
+>>>>>>> main
                     </p>
                   </div>
 
@@ -825,7 +965,11 @@ export default function AdaminDashboard() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
+<<<<<<< HEAD
                       {issue.comments.length} comments
+=======
+                      {issue.comments} comments
+>>>>>>> main
                     </span>
                   </div>
 
@@ -833,7 +977,11 @@ export default function AdaminDashboard() {
                     <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1">
                       View Details
                     </Button>
+<<<<<<< HEAD
                     <Select value={issue.status.toLowerCase()} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
+=======
+                    <Select value={issue.status} onValueChange={(value) => updateIssueStatus(issue.id, value)}>
+>>>>>>> main
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -854,10 +1002,14 @@ export default function AdaminDashboard() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <AdminNavbar adminName={admin?.fullname || "Admin"} onLogout={handleAdminLogout} />
 
       <div className="flex flex-1">
+=======
+    <div className="min-h-screen bg-gray-50 flex">
+>>>>>>> main
       <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />
 
       <div className="flex-1">
@@ -901,7 +1053,10 @@ export default function AdaminDashboard() {
           />
         </div>
       </div>
+<<<<<<< HEAD
       </div>
+=======
+>>>>>>> main
     </div>
   )
 }

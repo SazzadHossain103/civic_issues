@@ -7,22 +7,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+<<<<<<< HEAD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+=======
+>>>>>>> main
 
 interface EditPermissionsModalProps {
   isOpen: boolean
   onClose: () => void
   admin: any
+<<<<<<< HEAD
   onUpdatePermissions: (adminId: string, role: string, department: string, permissions: string[]) => void
 }
 
 export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissions }: EditPermissionsModalProps) {
   const [selectedRole, setSelectedRole] = useState("")
   const [selectedDepartment, setSelectedDepartment] = useState("")
+=======
+  onUpdatePermissions: (adminId: number, permissions: string[]) => void
+}
+
+export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissions }: EditPermissionsModalProps) {
+>>>>>>> main
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
 
   const availablePermissions = ["view", "edit", "respond", "moderate", "all"]
 
+<<<<<<< HEAD
   const availableRoles = ["Super Admin", "Regional Admin", "Department Admin", "Moderator"]
 
   const availableDepartments = [
@@ -43,6 +54,10 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
     if (admin) {
       setSelectedRole(admin.role || "")
       setSelectedDepartment(admin.department || "")
+=======
+  useEffect(() => {
+    if (admin) {
+>>>>>>> main
       setSelectedPermissions(admin.permissions || [])
     }
   }, [admin])
@@ -50,7 +65,11 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (admin) {
+<<<<<<< HEAD
       onUpdatePermissions(admin._id, selectedRole, selectedDepartment, selectedPermissions)
+=======
+      onUpdatePermissions(admin.id, selectedPermissions)
+>>>>>>> main
     }
     onClose()
   }
@@ -65,6 +84,7 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
+<<<<<<< HEAD
           <DialogTitle>Edit Admin Details - {admin.name}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,6 +118,14 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
                 ))}
               </SelectContent>
             </Select>
+=======
+          <DialogTitle>Edit Permissions - {admin.name}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Current Role: {admin.role}</Label>
+            <Label>Department: {admin.department}</Label>
+>>>>>>> main
           </div>
 
           <div className="space-y-2">
@@ -123,7 +151,11 @@ export function EditPermissionsModal({ isOpen, onClose, admin, onUpdatePermissio
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
+<<<<<<< HEAD
               Update Admin
+=======
+              Update Permissions
+>>>>>>> main
             </Button>
           </div>
         </form>

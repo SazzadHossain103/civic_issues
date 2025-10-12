@@ -1,6 +1,10 @@
 "use client"
 
+<<<<<<< HEAD
 import { useState, useEffect } from "react"
+=======
+import { useState } from "react"
+>>>>>>> main
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,13 +13,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Filter, Eye } from "lucide-react"
 import Link from "next/link"
 import { Navigation } from "@/components/navigation"
+<<<<<<< HEAD
 import { getIssues } from "@/components/getData"
+=======
+>>>>>>> main
 
 export default function BrowseIssuesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
 
+<<<<<<< HEAD
   const [issues, setIssues] = useState([])
   useEffect(() => {
     const fetehData = async () => {
@@ -27,6 +35,9 @@ export default function BrowseIssuesPage() {
   }, [issues])
 
   const issuesDemo = [
+=======
+  const issues = [
+>>>>>>> main
     {
       id: 1,
       title: "Broken Road on Dhanmondi 27",
@@ -89,7 +100,11 @@ export default function BrowseIssuesPage() {
     },
   ]
 
+<<<<<<< HEAD
   const filteredIssues = issues.filter((issue: any) => {
+=======
+  const filteredIssues = issues.filter((issue) => {
+>>>>>>> main
     const matchesSearch =
       issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       issue.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -185,10 +200,17 @@ export default function BrowseIssuesPage() {
 
         {/* Issues Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+<<<<<<< HEAD
           {filteredIssues.map((issue: any) => (
             <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-muted">
                 <img src={issue.images[0] || "/placeholder.svg"} alt={issue.title} className="w-full h-full object-cover" />
+=======
+          {filteredIssues.map((issue) => (
+            <Card key={issue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video bg-muted">
+                <img src={issue.image || "/placeholder.svg"} alt={issue.title} className="w-full h-full object-cover" />
+>>>>>>> main
               </div>
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -201,13 +223,21 @@ export default function BrowseIssuesPage() {
                     {issue.location}
                   </div>
                   <div className="text-xs">
+<<<<<<< HEAD
                     By {issue.postBy.fullname} • {issue.postDate.split("T")[0]}
+=======
+                    By {issue.postedBy} • {issue.postedDate}
+>>>>>>> main
                   </div>
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button variant="outline" className="w-full bg-transparent" asChild>
+<<<<<<< HEAD
                   <Link href={`/issue/${issue._id}`}>
+=======
+                  <Link href={`/issue/${issue.id}`}>
+>>>>>>> main
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </Link>

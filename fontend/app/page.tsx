@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Camera, Users, TrendingUp, AlertTriangle, Zap, Droplets, Trash2 } from "lucide-react"
 import Link from "next/link"
+<<<<<<< HEAD
 // import { useState, useEffect } from "react"
 import { getIssues } from "@/components/getData"
 
@@ -21,6 +22,11 @@ export default async function HomePage() {
   //   console.log("recentIssues from homepage: ", recentIssues )
   // }, [recentIssues])
   const recentIssuesDemo = [
+=======
+
+export default function HomePage() {
+  const recentIssues = [
+>>>>>>> main
     {
       id: 1,
       title: "Broken Road on Dhanmondi 27",
@@ -48,17 +54,30 @@ export default async function HomePage() {
   ]
 
   const stats = [
+<<<<<<< HEAD
     { label: "Total Reports", value: recentIssues.data.length, icon: AlertTriangle },
     { label: "Resolved Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'resolved').length , icon: TrendingUp },
     { label: "In progress Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'in-progress').length, icon: Users },
+=======
+    { label: "Total Reports", value: "1,247", icon: AlertTriangle },
+    { label: "Resolved Issues", value: "892", icon: TrendingUp },
+    { label: "Active Users", value: "3,456", icon: Users },
+>>>>>>> main
     { label: "Cities Covered", value: "64", icon: MapPin },
   ]
 
   const categories = [
+<<<<<<< HEAD
     { name: "Road Issues", icon: AlertTriangle, count: recentIssues.data.filter((issue:any)=> issue.category === 'road').length , color: "bg-red-100 text-red-700" },
     { name: "Electricity", icon: Zap, count: recentIssues.data.filter((issue:any)=> issue.category === 'electricity').length, color: "bg-yellow-100 text-yellow-700" },
     { name: "Water Supply", icon: Droplets, count: recentIssues.data.filter((issue:any)=> issue.category === 'water').length, color: "bg-blue-100 text-blue-700" },
     { name: "Waste Management", icon: Trash2, count: recentIssues.data.filter((issue:any)=> issue.category === 'waste').length, color: "bg-green-100 text-green-700" },
+=======
+    { name: "Road Issues", icon: AlertTriangle, count: 324, color: "bg-red-100 text-red-700" },
+    { name: "Electricity", icon: Zap, count: 198, color: "bg-yellow-100 text-yellow-700" },
+    { name: "Water Supply", icon: Droplets, count: 156, color: "bg-blue-100 text-blue-700" },
+    { name: "Waste Management", icon: Trash2, count: 89, color: "bg-green-100 text-green-700" },
+>>>>>>> main
   ]
 
   return (
@@ -139,6 +158,7 @@ export default async function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
+<<<<<<< HEAD
             {recentIssues.data && recentIssues.data
             .sort((a: any, b: any) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime())
             .slice(0,3)
@@ -149,6 +169,15 @@ export default async function HomePage() {
                     src={issue.images[0] || "/placeholder.svg"}
                     alt={issue.title}
                     className="w-full max-h-[220px] object-cover"
+=======
+            {recentIssues.map((issue) => (
+              <Card key={issue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="aspect-video bg-muted">
+                  <img
+                    src={issue.image || "/placeholder.svg"}
+                    alt={issue.title}
+                    className="w-full h-full object-cover"
+>>>>>>> main
                   />
                 </div>
                 <CardHeader>
@@ -163,7 +192,11 @@ export default async function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <Button variant="outline" className="w-full bg-transparent" asChild>
+<<<<<<< HEAD
                     <Link href={`/issue/${issue._id}`}>View Details</Link>
+=======
+                    <Link href={`/issue/${issue.id}`}>View Details</Link>
+>>>>>>> main
                   </Button>
                 </CardContent>
               </Card>

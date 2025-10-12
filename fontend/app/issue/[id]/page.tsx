@@ -1,6 +1,10 @@
 "use client"
 
+<<<<<<< HEAD
 // import type React from "react"
+=======
+import type React from "react"
+>>>>>>> main
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, Calendar, User, MessageCircle, ArrowLeft, ThumbsUp, Heart } from "lucide-react"
 import Link from "next/link"
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { ImageGallery } from "@/components/image-gallery"
@@ -49,11 +54,28 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
     title: "Broken Road on Dhanmondi 27",
     category: "Road",
     location: "Dhanmondi 27, Block #A, Dhaka 1209",
+=======
+import { useState } from "react"
+import { Navigation } from "@/components/navigation"
+
+export default function IssueDetailsPage({ params }: { params: { id: string } }) {
+  const [newComment, setNewComment] = useState("")
+  const [hasVoted, setHasVoted] = useState(false)
+  const [voteCount, setVoteCount] = useState(23) // Mock initial vote count
+
+  // Mock data - in real app, fetch based on params.id
+  const issue = {
+    id: 1,
+    title: "Broken Road on Dhanmondi 27",
+    category: "Road",
+    location: "Dhanmondi 27, Dhaka 1209",
+>>>>>>> main
     status: "In Progress",
     postedBy: "Ahmed Rahman",
     postedDate: "2024-01-15",
     description:
       "There are several large potholes on Dhanmondi 27 road that have been causing problems for vehicles and pedestrians. The potholes have been growing larger due to recent rains and are now causing traffic congestion. This is a major safety hazard, especially during night time when visibility is poor. The road needs immediate repair to prevent accidents and ensure smooth traffic flow.",
+<<<<<<< HEAD
     images: [
       "/placeholder.svg?height=400&width=600&text=Broken+Road+Main+View",
       "/placeholder.svg?height=400&width=600&text=Pothole+Close+Up",
@@ -61,6 +83,9 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
       "/placeholder.svg?height=400&width=600&text=Night+View+Safety+Hazard",
       "/placeholder.svg?height=400&width=600&text=Road+Damage+Detail",
     ],
+=======
+    image: "/placeholder.svg?height=400&width=600&text=Broken+Road+Dhanmondi+27",
+>>>>>>> main
     comments: [
       {
         id: 1,
@@ -92,6 +117,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
     ],
   }
 
+<<<<<<< HEAD
   // const handleCommentSubmit = (e: React.FormEvent) => {
   //   e.preventDefault()
   //   if (newComment.trim()) {
@@ -237,6 +263,26 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
     }
   };
 
+=======
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newComment.trim()) {
+      console.log("New comment:", newComment)
+      setNewComment("")
+      // Handle comment submission
+    }
+  }
+
+  const handleVote = () => {
+    if (hasVoted) {
+      setVoteCount((prev) => prev - 1)
+      setHasVoted(false)
+    } else {
+      setVoteCount((prev) => prev + 1)
+      setHasVoted(true)
+    }
+  }
+>>>>>>> main
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -272,11 +318,19 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
+<<<<<<< HEAD
                     {issue.postBy && issue.postBy?.fullname}
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
                     {issue.postDate?.split("T")[0]}
+=======
+                    {issue.postedBy}
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {issue.postedDate}
+>>>>>>> main
                   </div>
                   <Badge variant="outline">{issue.category}</Badge>
                 </div>
@@ -288,7 +342,13 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Image */}
+<<<<<<< HEAD
             <ImageGallery images={issue.images} title={issue.title} />
+=======
+            <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+              <img src={issue.image || "/placeholder.svg"} alt={issue.title} className="w-full h-full object-cover" />
+            </div>
+>>>>>>> main
 
             {/* Location */}
             <div className="flex items-center text-muted-foreground">
@@ -335,6 +395,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* Map Placeholder */}
+<<<<<<< HEAD
             <div>
               <div className="flex" >
                 <MapPin className="h-5 w-5 mr-2" />
@@ -353,6 +414,12 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                 />
                 {/* <p className="text-sm text-muted-foreground">Showing exact location of the reported issue</p> */}
               </div>
+=======
+            <div className="bg-muted rounded-lg p-8 text-center">
+              <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+              <p className="text-muted-foreground">Interactive map would be displayed here</p>
+              <p className="text-sm text-muted-foreground">Showing exact location of the reported issue</p>
+>>>>>>> main
             </div>
           </CardContent>
         </Card>
@@ -362,13 +429,18 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
           <CardHeader>
             <CardTitle className="flex items-center">
               <MessageCircle className="mr-2 h-5 w-5" />
+<<<<<<< HEAD
               Comments & Updates ({comments?.length})
+=======
+              Comments & Updates ({issue.comments.length})
+>>>>>>> main
             </CardTitle>
             <CardDescription>Track progress and join the discussion about this issue</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Existing Comments */}
             <div className="space-y-4">
+<<<<<<< HEAD
               {comments && comments.map((comment: any) => (
                 <div key={comment._id} className="flex space-x-3">
                   <Avatar>
@@ -378,11 +450,23 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold">{comment.commentBy.fullname}</span>
+=======
+              {issue.comments.map((comment) => (
+                <div key={comment.id} className="flex space-x-3">
+                  <Avatar>
+                    <AvatarImage src={comment.avatar || "/placeholder.svg"} />
+                    <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold">{comment.author}</span>
+>>>>>>> main
                       {comment.isOfficial && (
                         <Badge variant="secondary" className="text-xs">
                           Official
                         </Badge>
                       )}
+<<<<<<< HEAD
                       <span className="text-sm text-muted-foreground">{comment.commentAt.split("T")[0]}</span>
                       <button
                         className="ml-auto text-red-500 text-sm hover:underline"
@@ -392,6 +476,11 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                       </button>
                     </div>
                     <p className="text-muted-foreground">{comment.message}</p>
+=======
+                      <span className="text-sm text-muted-foreground">{comment.date}</span>
+                    </div>
+                    <p className="text-muted-foreground">{comment.content}</p>
+>>>>>>> main
                   </div>
                 </div>
               ))}

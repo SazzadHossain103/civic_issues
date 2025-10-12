@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+<<<<<<< HEAD
 import { useGlobalStore } from "@/components/globalVariable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
@@ -13,6 +14,11 @@ import { useRouter } from "next/navigation"
 import {jwtDecode} from "jwt-decode";
 
 type JwtPayload = { exp: number }
+=======
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+>>>>>>> main
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,13 +27,17 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+<<<<<<< HEAD
   const { token, isLoggedIn, user, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
 
+=======
+>>>>>>> main
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
+<<<<<<< HEAD
     // api call backend
     const userloginData = {
       email: email,
@@ -84,6 +94,23 @@ export default function LoginPage() {
     // } else {
     //   setError("Invalid email or password. Use sazzad@gmail.com / 12345678")
     // }
+=======
+    // Demo user credentials
+    if (email === "sazzad@gmail.com" && password === "12345678") {
+      // Set user data in localStorage
+      const userData = {
+        email: "sazzad@gmail.com",
+        name: "Sazzad Rahman",
+        id: "user_001",
+      }
+      localStorage.setItem("currentUser", JSON.stringify(userData))
+
+      // Redirect to home page
+      router.push("/")
+    } else {
+      setError("Invalid email or password. Use sazzad@gmail.com / 12345678")
+    }
+>>>>>>> main
 
     setIsLoading(false)
   }
@@ -104,7 +131,13 @@ export default function LoginPage() {
             <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+<<<<<<< HEAD
             <form className="space-y-4" onSubmit={handleSubmit}>  {/* login Form fields */}
+=======
+            <form className="space-y-4" 
+            // onSubmit={handleSubmit}
+            >  {/* login Form fields */}
+>>>>>>> main
               {error && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
               )}

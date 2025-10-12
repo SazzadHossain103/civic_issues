@@ -48,7 +48,11 @@ export default function RegisterPage() {
           <CardContent className="space-y-4" >
             <form className="space-y-4" 
             // method="POST" action="http://localhost:5000/api/users/register" 
+<<<<<<< HEAD
             onSubmit={handleSubmit}
+=======
+            // onSubmit={handleSubmit}
+>>>>>>> main
             >    {/* register Form fields */}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>

@@ -11,7 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, MapPin, Calendar, FileText, Settings, Eye, MessageSquare } from "lucide-react"
+<<<<<<< HEAD
 import { useGlobalStore } from "@/components/globalVariable"
+=======
+>>>>>>> main
 
 // Mock user data - in real app this would come from authentication/database
 const mockUser = {
@@ -78,7 +81,10 @@ const bangladeshDistricts = [
 ]
 
 export default function ProfilePage() {
+<<<<<<< HEAD
   // const { user, isLoggedIn} = useGlobalStore();
+=======
+>>>>>>> main
   const [user, setUser] = useState(mockUser)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState(mockUser)

@@ -1,8 +1,13 @@
 "use client"
 
 import type React from "react"
+<<<<<<< HEAD
 import { useGlobalStore } from "@/components/globalVariable"
 import { useState, useEffect } from "react"
+=======
+
+import { useState } from "react"
+>>>>>>> main
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,14 +24,20 @@ import {
   MessageCircle,
   Eye,
   ArrowRight,
+<<<<<<< HEAD
   X,
   Plus,
+=======
+>>>>>>> main
 } from "lucide-react"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Navigation } from "@/components/navigation"
+<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import { getIssues } from "@/components/getData"
+=======
+>>>>>>> main
 
 const existingIssues = [
   {
@@ -137,17 +148,23 @@ const bangladeshLocations = [
 ]
 
 export default function ReportIssuePage() {
+<<<<<<< HEAD
   const { token, isLoggedIn,  setToken, setIsLoggedIn } = useGlobalStore();  
   const [currentStep, setCurrentStep] = useState(1)
   // const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+=======
+  const [currentStep, setCurrentStep] = useState(1)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+>>>>>>> main
   const [formData, setFormData] = useState({
     title: "",
     category: "",
     location: "",
     description: "",
   })
+<<<<<<< HEAD
   const [duplicateIssues, setDuplicateIssues] = useState<any[]>([])
   const [showDuplicates, setShowDuplicates] = useState(false)
   const router = useRouter();
@@ -206,6 +223,21 @@ const removeImage = (index: number) => {
   setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   setPreviewImages((prev) => prev.filter((_, i) => i !== index));
 };
+=======
+  const [duplicateIssues, setDuplicateIssues] = useState<typeof existingIssues>([])
+  const [showDuplicates, setShowDuplicates] = useState(false)
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+>>>>>>> main
 
   const handleNextStep = () => {
     if (!formData.category || !formData.location) {
@@ -213,7 +245,11 @@ const removeImage = (index: number) => {
       return
     }
 
+<<<<<<< HEAD
     const duplicates = duplicateIssues.filter(
+=======
+    const duplicates = existingIssues.filter(
+>>>>>>> main
       (issue) => issue.category === formData.category && issue.location === formData.location,
     )
 
@@ -231,6 +267,7 @@ const removeImage = (index: number) => {
     setCurrentStep(2)
   }
 
+<<<<<<< HEAD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoggedIn || !token) {
@@ -285,11 +322,24 @@ const removeImage = (index: number) => {
     // setCurrentStep(1)
     // setFormData({ title: "", category: "", location: "", description: "" })
     // setSelectedImages([])
+=======
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted:", formData)
+    alert("Issue posted successfully! We'll review it shortly.")
+    setCurrentStep(1)
+    setFormData({ title: "", category: "", location: "", description: "" })
+    setSelectedImage(null)
+>>>>>>> main
   }
 
   return (
     <div className="min-h-screen bg-background">
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -392,11 +442,19 @@ const removeImage = (index: number) => {
 
               <div className="space-y-4 mb-6">
                 {duplicateIssues.map((issue) => (
+<<<<<<< HEAD
                   <Card key={issue._id} className="border-orange-200">
                     <CardContent className="p-4">
                       <div className="flex gap-4">
                         <img
                           src={issue.images[0] || "/placeholder.svg"}
+=======
+                  <Card key={issue.id} className="border-orange-200">
+                    <CardContent className="p-4">
+                      <div className="flex gap-4">
+                        <img
+                          src={issue.image || "/placeholder.svg"}
+>>>>>>> main
                           alt={issue.title}
                           className="w-20 h-20 object-cover rounded-lg"
                         />
@@ -407,11 +465,19 @@ const removeImage = (index: number) => {
                           <div className="flex items-center gap-4 text-xs mb-2">
                             <span className="flex items-center gap-1">
                               <ThumbsUp className="h-3 w-3" />
+<<<<<<< HEAD
                               {issue.votes} votes
                             </span>
                             <span className="flex items-center gap-1">
                               <MessageCircle className="h-3 w-3" />
                               {issue.comments.length} comments
+=======
+                              {issue.likes} votes
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MessageCircle className="h-3 w-3" />
+                              {issue.comments} comments
+>>>>>>> main
                             </span>
                             <span
                               className={`px-2 py-1 rounded-full text-xs ${
@@ -426,7 +492,11 @@ const removeImage = (index: number) => {
                             </span>
                           </div>
                           <Button size="sm" variant="outline" asChild>
+<<<<<<< HEAD
                             <Link href={`/issue/${issue._id}`}>
+=======
+                            <Link href={`/issue/${issue.id}`}>
+>>>>>>> main
                               <Eye className="h-3 w-3 mr-1" />
                               View & Vote
                             </Link>
@@ -458,7 +528,11 @@ const removeImage = (index: number) => {
                 Step 2: Issue Details
               </CardTitle>
               <CardDescription>
+<<<<<<< HEAD
                 Now provide the details of your issue including photos, title, and description.
+=======
+                Now provide the details of your issue including photo, title, and description.
+>>>>>>> main
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -479,6 +553,7 @@ const removeImage = (index: number) => {
 
                 {/* Photo Upload */}
                 <div className="space-y-2">
+<<<<<<< HEAD
                   <Label htmlFor="photo">Upload Photos *</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6">
                     {previewImages.length > 0 ? (
@@ -537,6 +612,33 @@ const removeImage = (index: number) => {
                       className="hidden"
                       onChange={handleImageUpload}
                     />
+=======
+                  <Label htmlFor="photo">Upload Photo *</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                    {selectedImage ? (
+                      <div className="space-y-4">
+                        <img
+                          src={selectedImage || "/placeholder.svg"}
+                          alt="Uploaded issue"
+                          className="max-h-64 mx-auto rounded-lg"
+                        />
+                        <Button type="button" variant="outline" onClick={() => setSelectedImage(null)}>
+                          Change Photo
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <div>
+                          <Label htmlFor="photo" className="cursor-pointer">
+                            <span className="text-primary hover:text-primary/80">Click to upload</span> or drag and drop
+                          </Label>
+                          <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
+                        </div>
+                      </div>
+                    )}
+                    <Input id="photo" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+>>>>>>> main
                   </div>
                 </div>
 
@@ -567,7 +669,11 @@ const removeImage = (index: number) => {
 
                 {/* Submit Buttons */}
                 <div className="flex gap-4">
+<<<<<<< HEAD
                   <Button type="submit" className="flex-1" disabled={selectedImages.length === 0}>
+=======
+                  <Button type="submit" className="flex-1">
+>>>>>>> main
                     Submit Post
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>

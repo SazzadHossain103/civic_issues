@@ -137,7 +137,7 @@ const bangladeshLocations = [
 ]
 
 export default function ReportIssuePage() {
-  const { token, isLoggedIn,  setToken, setIsLoggedIn } = useGlobalStore();  
+  const { token, isLoggedIn, setToken, setIsLoggedIn } = useGlobalStore();
   const [currentStep, setCurrentStep] = useState(1)
   // const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -153,13 +153,13 @@ export default function ReportIssuePage() {
   const router = useRouter();
 
   // const [recentIssues, setrecentIssues] = useState([])
-    useEffect(() => {
-      const fetehData = async () => {
-        const result = await getIssues();
-        setDuplicateIssues(result.data);
-      }
-      fetehData();
-    }, [])
+  useEffect(() => {
+    const fetehData = async () => {
+      const result = await getIssues();
+      setDuplicateIssues(result.data);
+    }
+    fetehData();
+  }, [])
 
   // const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   const files = event.target.files
@@ -180,15 +180,15 @@ export default function ReportIssuePage() {
   // }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const files = event.target.files;
-  if (files) {
-    const fileArray = Array.from(files);
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
 
-    // store actual files for upload
-    setSelectedImages((prev) => [...prev, ...fileArray]);
+      // store actual files for upload
+      setSelectedImages((prev) => [...prev, ...fileArray]);
 
-    // create previews
-        Array.from(files).forEach((file) => {
+      // create previews
+      Array.from(files).forEach((file) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           const result = e.target?.result as string
@@ -196,16 +196,16 @@ export default function ReportIssuePage() {
         }
         reader.readAsDataURL(file)
       })
-    // const previewArray = fileArray.map((file) => URL.createObjectURL(file));
-    // setPreviewImages((prev) => [...prev, ...previewArray]);
+      // const previewArray = fileArray.map((file) => URL.createObjectURL(file));
+      // setPreviewImages((prev) => [...prev, ...previewArray]);
 
-  }
-};
+    }
+  };
 
-const removeImage = (index: number) => {
-  setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-  setPreviewImages((prev) => prev.filter((_, i) => i !== index));
-};
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleNextStep = () => {
     if (!formData.category || !formData.location) {
@@ -234,16 +234,16 @@ const removeImage = (index: number) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoggedIn || !token) {
-    alert("Please login to post.");
-    router.push("/login"); // redirect to login page
-    return;
+      alert("Please login to post.");
+      router.push("/login"); // redirect to login page
+      return;
     }
     console.log("Form submitted:", formData)
     console.log("Images:", selectedImages)
 
     if (selectedImages.length === 0) {
-    alert("Please upload at least one image.");
-    return;
+      alert("Please upload at least one image.");
+      return;
     }
 
     const form = new FormData();
@@ -251,41 +251,39 @@ const removeImage = (index: number) => {
     form.append("category", formData.category);
     form.append("location", formData.location);
     form.append("description", formData.description);
-    selectedImages.forEach((file) => {form.append("images", file)});
+    selectedImages.forEach((file) => { form.append("images", file) });
 
     console.log(form);
 
     try {
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/add`, {
-      method: "POST",
-      headers: {  Authorization: `Bearer ${token}`, },
-      // body: JSON.stringify(form),
-      body: form,
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/add`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, },
+        // body: JSON.stringify(form),
+        body: form,
 
-    });
+      });
 
-    if (res.ok) {
-      alert("Post issue successfull");
-    }else{
-      const error = await res.json();
-      alert(error.message || "Failed to post issue.");
+      if (res.ok) {
+        alert("Post issue successfull");
+      } else {
+        const error = await res.json();
+        alert(error.message || "Failed to post issue.");
+      }
+
+      setCurrentStep(1);
+      setFormData({ title: "", category: "", location: "", description: "" });
+      setSelectedImages([]);
+      setPreviewImages([]);
+    } catch (err) {
+      alert("An error occurred while posting the issue must be logged in.");
+      console.error(err);
     }
-
-    setCurrentStep(1);
-    setFormData({ title: "", category: "", location: "", description: "" });
-    setSelectedImages([]);
-    setPreviewImages([]);
-  } catch (err) {
-    alert("An error occurred while posting the issue must be logged in.");
-    console.error(err);
   }
+ 
 
-    // alert("Issue posted successfully! We'll review it shortly.")
-    // setCurrentStep(1)
-    // setFormData({ title: "", category: "", location: "", description: "" })
-    // setSelectedImages([])
-  }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -414,13 +412,12 @@ const removeImage = (index: number) => {
                               {issue.comments.length} comments
                             </span>
                             <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                issue.status === "Under Review"
+                              className={`px-2 py-1 rounded-full text-xs ${issue.status === "Under Review"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : issue.status === "In Progress"
                                     ? "bg-blue-100 text-blue-800"
                                     : "bg-gray-100 text-gray-800"
-                              }`}
+                                }`}
                             >
                               {issue.status}
                             </span>

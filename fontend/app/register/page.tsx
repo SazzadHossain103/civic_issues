@@ -16,18 +16,23 @@ export default function RegisterPage() {
       password: formData.get("password"),
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      alert("Registration successful!");
-      // Optionally redirect or clear form
-    } else {
-      const error = await res.json();
-      alert(error.message || "Registration failed!");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+  
+      if (res.ok) {
+        alert("Registration successful!");
+        // Optionally redirect or clear form
+      } else {
+        const error = await res.json();
+        alert(error.message || "Registration failed!");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("An error occurred. Please try again later.");
     }
   }
   return (

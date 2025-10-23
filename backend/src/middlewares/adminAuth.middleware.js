@@ -24,7 +24,7 @@ export const verifyAdminJWT = asyncHandler(async (req, res, next) => {
 });
 
 export const requireSuperAdmin = (req, res, next) => {
-  if (req.admin.role !== "Super Admin") {
+  if (req.user.role !== "Super Admin") {
     throw new ApiError("Forbidden: Super Admin access only", 403);
   }
   next();

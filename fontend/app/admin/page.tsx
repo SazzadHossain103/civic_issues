@@ -17,6 +17,7 @@ import { AdminLoginForm } from "@/components/admin-login-form"
 import { useGlobalStore } from "@/components/globalVariable"
 import { getIssues, getUsers } from "@/components/getData"
 import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation";
 
 type JwtPayload = { exp: number };
 
@@ -194,9 +195,10 @@ export default function AdaminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [activeView, setActiveView] = useState("dashboard")
+  const router = useRouter();
 
 
-  const { adminToken, adminTokenExpiry, isAdminLoggedIn, admin, adminlogout, setAdmin,  setAdminToken, setIsAdminLoggedIn } = useGlobalStore();
+  const { user, isLoggedIn, adminToken, adminTokenExpiry, isAdminLoggedIn, admin, logout, adminlogout, setAdmin, setAdminToken, setIsAdminLoggedIn } = useGlobalStore();
 
   useEffect(() => {
     if (adminTokenExpiry && Date.now() > adminTokenExpiry) {
@@ -204,7 +206,7 @@ export default function AdaminDashboard() {
     }
   }, [adminTokenExpiry, adminlogout]);
 
- 
+
   useEffect(() => {
     const fetchData = async () => {
       const resissues = await getIssues();
@@ -212,11 +214,12 @@ export default function AdaminDashboard() {
       const resusers = await getUsers();
       setUsers(resusers.data);
 
-      try{
-        const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/list`, { 
-        method: "GET",
-        headers: { Authorization: `Bearer ${adminToken}`, },
-        next: { revalidate: 10 } });
+      try {
+        const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/list`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${adminToken}`, },
+          next: { revalidate: 10 }
+        });
 
         if (!result.ok) {
           throw new Error("Failed to fetch issue");
@@ -225,12 +228,12 @@ export default function AdaminDashboard() {
         const data = await result.json();
         setAdmins(data.data);
       }
-      catch(error){
+      catch (error) {
         console.log("admins fetch error ", error)
       }
     }
     fetchData();
-    console.log("Admins from admin: ", admins )
+    console.log("Admins from admin: ", admins)
   }, [adminToken])
 
   // useEffect(() => {
@@ -258,7 +261,7 @@ export default function AdaminDashboard() {
   //   }
   // }
 
-  
+
 
   const handleAdminLogin = async (email: string, password: string) => {
     try {
@@ -361,12 +364,43 @@ export default function AdaminDashboard() {
     }
   }
 
-  const updateIssueStatus = (issueId: string, newStatus: string) => {
+  const updateIssueStatus = async (issueId: string, newStatus: string) => {
     setIssues(issues.map((issue) => (issue._id === issueId ? { ...issue, status: newStatus } : issue)))
-    
+
     // Update selectedIssue if it matches the updated issue
     if (selectedIssue && selectedIssue._id === issueId) {
       setSelectedIssue({ ...selectedIssue, status: newStatus })
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: issueId,
+          status: newStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update issue status");
+      }
+
+      console.log("Issue status updated:", data.message);
+      alert("Issue status updated successfully");
+    } catch (error) {
+      console.error("Error updating issue status:", error);
+
+      // Rollback optimistic update if API fails
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === issueId ? { ...issue, status: "Pending" } : issue
+        )
+      );
     }
   }
 
@@ -384,14 +418,42 @@ export default function AdaminDashboard() {
     setUsers((prev) => [...prev, userData])
   }
 
-  const handleDeleteUser = (userId: number) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId))
+  const handleDeleteUser = async (userId: string) => {
+    const previousUsers = users;
+    setUsers((prev) => prev.filter((user) => user._id !== userId))
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete user");
+      }
+
+      if(isLoggedIn && user?._id === userId) {
+        logout();
+      }
+
+      console.log("User deleted successfully:", data.message);
+      alert("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      // Rollback UI if API fails
+      setUsers(previousUsers);
+    }
   }
 
   // const handleAddAdmin = (adminData: any) => {
   //   setAdmins((prev) => [...prev, adminData])
   // }
-  console.log("admin token : " , adminToken)
+  console.log("admin token : ", adminToken)
   const handleAddAdmin = async (adminData: any) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admins/add`, {
@@ -556,7 +618,7 @@ export default function AdaminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {users.map((user,index) => (
+                {users.map((user, index) => (
                   <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
@@ -570,9 +632,9 @@ export default function AdaminDashboard() {
                       </div>
 
                       <div className="space-y-2 text-sm text-gray-600">
-                        <p>
+                        {/* <p>
                           <strong>Location:</strong> {user.location}
-                        </p>
+                        </p> */}
                         <p>
                           <strong>Issues Reported:</strong> {issues.filter((issue) => issue.postBy._id === user._id).length}
                         </p>
@@ -588,8 +650,8 @@ export default function AdaminDashboard() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          className="flex-1"
-                          onClick={() => handleDeleteUser(user.id)}
+                          className="flex-1 cursor-pointer"
+                          onClick={() => handleDeleteUser(user._id)}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
@@ -620,7 +682,7 @@ export default function AdaminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {admins && admins.map((item,index) => (
+                {admins && admins.map((item, index) => (
                   <Card key={index} className="border border-gray-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
@@ -687,7 +749,7 @@ export default function AdaminDashboard() {
                   <BarChart3 className="h-8 w-8 text-blue-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Issues</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalIssues}</p>
+                    <p className="text-2xl font-bold text-gray-900">{issues.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -699,7 +761,7 @@ export default function AdaminDashboard() {
                   <Clock className="h-8 w-8 text-yellow-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Pending</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.pendingIssues}</p>
+                    <p className="text-2xl font-bold text-gray-900">{issues.filter((issue: any) => issue.status.toLowerCase() === 'pending').length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -711,7 +773,7 @@ export default function AdaminDashboard() {
                   <AlertTriangle className="h-8 w-8 text-blue-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">In Progress</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.inProgressIssues}</p>
+                    <p className="text-2xl font-bold text-gray-900">{issues.filter((issue: any) => issue.status.toLowerCase() === 'in-progress').length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -723,7 +785,7 @@ export default function AdaminDashboard() {
                   <CheckCircle className="h-8 w-8 text-green-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Resolved</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.resolvedIssues}</p>
+                    <p className="text-2xl font-bold text-gray-900">{issues.filter((issue: any) => issue.status.toLowerCase() === 'resolved').length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -735,7 +797,7 @@ export default function AdaminDashboard() {
                   <Users className="h-8 w-8 text-purple-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
+                    <p className="text-2xl font-bold text-gray-900">{users.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -833,14 +895,14 @@ export default function AdaminDashboard() {
                     <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1">
                       View Details
                     </Button>
-                    <Select value={issue.status.toLowerCase()} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
+                    <Select value={issue.status} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="In-progress">In Progress</SelectItem>
+                        <SelectItem value="Resolved">Resolved</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -858,49 +920,49 @@ export default function AdaminDashboard() {
       <AdminNavbar adminName={admin?.fullname || "Admin"} onLogout={handleAdminLogout} />
 
       <div className="flex flex-1">
-      <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />
+        <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />
 
-      <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">{getViewTitle()}</h1>
-            <p className="text-gray-600 mt-2">Manage civic issues and monitor platform activity</p>
+        <div className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">{getViewTitle()}</h1>
+              <p className="text-gray-600 mt-2">Manage civic issues and monitor platform activity</p>
+            </div>
+
+            {renderContent()}
+
+            {/* Issue Details Modal */}
+            <IssueDetailsModal
+              issue={selectedIssue}
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              onStatusUpdate={updateIssueStatus}
+            />
+
+            {/* Add User Modal */}
+            <AddUserModal
+              isOpen={isAddUserModalOpen}
+              onClose={() => setIsAddUserModalOpen(false)}
+              onAddUser={handleAddUser}
+            />
+
+            {/* Add Admin Modal */}
+            <AddAdminModal
+              isOpen={isAddAdminModalOpen}
+              onClose={() => setIsAddAdminModalOpen(false)}
+              onAddAdmin={handleAddAdmin}
+            />
+
+            {/* Edit Permissions Modal */}
+            <EditPermissionsModal
+              isOpen={isEditPermissionsModalOpen}
+              onClose={() => setIsEditPermissionsModalOpen(false)}
+              admin={selectedAdmin}
+              onUpdatePermissions={handleUpdatePermissions}
+            />
           </div>
-
-          {renderContent()}
-
-          {/* Issue Details Modal */}
-          <IssueDetailsModal
-            issue={selectedIssue}
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            onStatusUpdate={updateIssueStatus}
-          />
-
-          {/* Add User Modal */}
-          <AddUserModal
-            isOpen={isAddUserModalOpen}
-            onClose={() => setIsAddUserModalOpen(false)}
-            onAddUser={handleAddUser}
-          />
-
-          {/* Add Admin Modal */}
-          <AddAdminModal
-            isOpen={isAddAdminModalOpen}
-            onClose={() => setIsAddAdminModalOpen(false)}
-            onAddAdmin={handleAddAdmin}
-          />
-
-          {/* Edit Permissions Modal */}
-          <EditPermissionsModal
-            isOpen={isEditPermissionsModalOpen}
-            onClose={() => setIsEditPermissionsModalOpen(false)}
-            admin={selectedAdmin}
-            onUpdatePermissions={handleUpdatePermissions}
-          />
         </div>
-      </div>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import User from "../models/user.model.js";
+import { Issue } from "../models/issue.model.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 
@@ -148,4 +149,44 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, users, "users fetched successfully"));
+});
+
+// Delete a user
+// export const deleteUser = asyncHandler(async (req, res) => {
+//   // const { id } = req.params;
+//   const user = await User.findByIdAndDelete(req.body.id);
+//   if (!user) {
+//     throw new ApiError("User not found", 404);
+//   }
+//   return res.status(200).json(new ApiResponse(200, null, "User deleted successfully"));
+// });
+
+export const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+
+  const user = await User.findByIdAndDelete(id);
+  if (!user) {
+    throw new ApiError("User not found", 404);
+  }
+
+  // 1️⃣ Delete all issues posted by the user
+  await Issue.deleteMany({ postBy: id });
+
+  // 2️⃣ Remove all comments made by the user
+  await Issue.updateMany(
+    {},
+    { $pull: { comments: { commentBy: id } } }
+  );
+
+  // 3️⃣ Remove user's votes and adjust the vote count
+  const votedIssues = await Issue.find({ votedBy: id });
+  for (const issue of votedIssues) {
+    issue.votedBy.pull(id);
+    issue.votes = Math.max(0, issue.votes - 1);
+    await issue.save();
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "User and related data deleted successfully"));
 });

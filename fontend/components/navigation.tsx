@@ -90,7 +90,7 @@ export function Navigation() {
       <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-              <h1 className="text-xl font-bold font-serif text-primary">CIVIC ISSUES</h1>
+              <Link href="/" className="text-xl font-bold font-serif text-primary">CIVIC ISSUES</Link>
             <div className="flex items-center space-x-8 flex-row">
               <div className="hidden md:flex space-x-6">
                 <Link href="/" className="text-foreground hover:text-primary transition-colors">
@@ -195,9 +195,9 @@ export function Navigation() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8 border-slate-500">
-                          <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Profile" />
+                          {/* <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Profile" /> */}
                           <AvatarFallback>
-                            <User className="h-4 w-4" />
+                            <User className="h-4 w-4 text-black " />
                           </AvatarFallback>
                         </Avatar>
                       </Button>

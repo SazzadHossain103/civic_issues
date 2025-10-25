@@ -14,7 +14,7 @@ router.route("/add").post(
 router.route("/list").get(getIssues);
 router.route("/single").post(getIssueById);
 router.route("/update").put(updateIssue);
-router.route("/delete").post(deleteIssue);
+router.route("/delete").delete(deleteIssue);
 router.route("/comment").post(verifyJWT, addComment);
 router.route("/commentadmin").post(verifyAdminJWT, addComment);
 router.route("/comment").delete(verifyJWT, deleteComment);

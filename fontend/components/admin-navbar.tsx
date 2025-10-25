@@ -27,10 +27,10 @@ export function AdminNavbar({ adminName, onLogout }: AdminNavbarProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Admin Profile</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem onClick={onLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>

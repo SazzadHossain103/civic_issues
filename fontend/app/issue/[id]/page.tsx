@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MapPin, Calendar, User, MessageCircle, ArrowLeft, ThumbsUp, Heart } from "lucide-react"
+import { MapPin, Calendar, User, MessageCircle, ArrowLeft, ThumbsUp, Heart, Trash2 } from "lucide-react"
 import Link from "next/link"
 import React, { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
@@ -312,8 +312,8 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                       variant={hasVoted ? "default" : "outline"}
                       className={
                         hasVoted
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "border-green-600 text-green-600 hover:bg-green-50"
+                          ? "bg-green-600 hover:bg-green-700 cursor-pointer"
+                          : "border-green-600 hover:bg-green-700 text-green-600 cursor-pointer"
                       }
                     >
                       <ThumbsUp className={`mr-2 h-4 w-4 ${hasVoted ? "fill-current" : ""}`} />
@@ -368,12 +368,12 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Existing Comments */}
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[300px] overflow-y-auto">
               {comments && comments.map((comment: any) => (
-                <div key={comment._id} className="flex space-x-3">
+                <div key={comment._id} className="flex space-x-3 group hover:bg-muted/20 p-2 rounded-md transition">
                   <Avatar>
-                    <AvatarImage src={comment?.avatar || "/placeholder.svg"} />
-                    {/* <AvatarFallback>{comment.commentBy.fullname[0]}</AvatarFallback> */}
+                    {/* <AvatarImage src={comment?.avatar || "/placeholder.svg"} /> */}
+                    <AvatarFallback>{comment.commentBy.fullname[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center space-x-2">
@@ -384,12 +384,15 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                         </Badge>
                       )}
                       <span className="text-sm text-muted-foreground">{comment.commentAt.split("T")[0]}</span>
-                      <button
-                        className="ml-auto text-red-500 text-sm hover:underline"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-auto text-red-500 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity "
                         onClick={() => handleDeleteComment(comment._id)}
                       >
-                        Delete
-                      </button>
+                        {/* Delete */}
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                     <p className="text-muted-foreground">{comment.message}</p>
                   </div>
@@ -410,7 +413,7 @@ export default function IssueDetailsPage({ params }: { params: Promise<{ id: str
                   <p className="text-sm text-muted-foreground">
                     Please be respectful and constructive in your comments
                   </p>
-                  <Button type="submit" disabled={!newComment.trim()}>
+                  <Button className="cursor-pointer" type="submit" disabled={!newComment.trim()}>
                     Post Comment
                   </Button>
                 </div>

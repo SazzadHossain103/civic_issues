@@ -7,7 +7,7 @@ type User = {
   _id: string;
   fullname: string;
   email: string;
-  // createdAt: string;
+  createdAt: string;
   // updatedAt: string;
   // __v: number;
 };

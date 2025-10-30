@@ -10,9 +10,11 @@ import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from "next/navigation"
 import { useGlobalStore } from "@/components/globalVariable"
+import { useRouter } from "next/navigation"
+
 
 export function Navigation() {
-  
+  const router = useRouter();
   const pathname = usePathname()
   const { token, tokenExpiry, isLoggedIn, user, logout, setUser,  setToken, setIsLoggedIn } = useGlobalStore();
   // const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -36,6 +38,7 @@ export function Navigation() {
   useEffect(() => {
     if (tokenExpiry && Date.now() > tokenExpiry) {
       logout();
+      router.push("/");
     }
   }, [tokenExpiry, logout]);
 
@@ -63,6 +66,7 @@ export function Navigation() {
 
       // ✅ Clear Zustand + localStorage
       logout();
+      router.push("/");
       // localStorage.removeItem("currentUser")
       console.log("User logged out successfully");
       alert("Logged out successfully");

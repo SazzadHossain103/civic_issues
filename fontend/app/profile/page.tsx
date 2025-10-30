@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, MapPin, Calendar, FileText, Settings, Eye, MessageSquare } from "lucide-react"
 import { useGlobalStore } from "@/components/globalVariable"
+import { getIssues } from "@/components/getData"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
 
 // Mock user data - in real app this would come from authentication/database
 const mockUser = {
@@ -78,10 +82,20 @@ const bangladeshDistricts = [
 ]
 
 export default function ProfilePage() {
-  // const { user, isLoggedIn} = useGlobalStore();
-  const [user, setUser] = useState(mockUser)
+  const router = useRouter();
+  const { user, isLoggedIn, logout } = useGlobalStore();
+  // const [user, setUser] = useState(mockUser)
+  const [issues, setIssues] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
-  const [editForm, setEditForm] = useState(mockUser)
+  const [editForm, setEditForm] = useState(user)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const resissues = await getIssues();
+      setIssues(resissues.data.filter((issue: any) => issue.postBy._id === user?._id));
+    };
+    fetchData();
+  }, [user]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -110,17 +124,71 @@ export default function ProfilePage() {
   }
 
   const handleSaveProfile = () => {
-    setUser(editForm)
+    // setUser(editForm)
     setIsEditing(false)
   }
 
   const handleCancelEdit = () => {
-    setEditForm(user)
+    // setEditForm(user)
     setIsEditing(false)
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }))
+    setEditForm((prev) => (prev ? ({ ...prev, [field]: value } as any) : prev))
+  }
+  const handleDeleteIssue = async (issueId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: issueId}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert('Failed to delete issue');
+        throw new Error(data.message || 'Failed to delete issue');
+      }
+      console.log('Issue deleted successfully:', data.message);
+      alert('Issue deleted successfully');
+      
+    } catch (error) {
+      console.error('Error deleting issue:', error);
+      alert('Error deleting issue');
+    }
+    setIssues((prevIssues) => prevIssues.filter((issue) => issue._id !== issueId));
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete user");
+      }
+
+      if(isLoggedIn && user?._id === userId) {
+        logout();
+        router.push("/");
+      }
+      console.log("User deleted successfully:", data.message);
+      alert("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Error deleting user");
+    }
   }
 
   return (
@@ -140,39 +208,41 @@ export default function ProfilePage() {
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="h-24 w-24 mb-4">
                     <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
-                      {user.firstName[0]}
-                      {user.lastName[0]}
+                      {user?.fullname[0]}
+                      {/* {user.lastName[0]}/ */}
                     </AvatarFallback>
                   </Avatar>
 
                   <h2 className="text-xl font-semibold font-serif text-foreground">
-                    {user.firstName} {user.lastName}
+                    {user?.fullname}
                   </h2>
-                  <p className="text-muted-foreground mb-4">{user.email}</p>
+                  <p className="text-muted-foreground mb-4">{user?.email}</p>
 
                   <div className="w-full space-y-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    {/* <div className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       <span>{bangladeshDistricts.find((d) => d.value === user.district)?.label}</span>
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>Joined {user.joinDate}</span>
+                      <span>Joined {user?.createdAt.split("T")[0]}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <FileText className="h-4 w-4" />
-                      <span>{user.issuesReported} Issues Reported</span>
+                      <span>{
+                        issues.length
+                      } Issues Reported</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 w-full mt-6 pt-6 border-t">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-primary">{user.issuesReported}</p>
+                      <p className="text-2xl font-bold text-primary">{issues.length}</p>
                       <p className="text-xs text-muted-foreground">Reported</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-green-600">{user.issuesResolved}</p>
-                      <p className="text-xs text-muted-foreground">Resolved</p>
+                      <p className="text-2xl font-bold text-green-600">{issues.filter((issue: any) => issue.status.toLowerCase() === 'resolved').length}</p>
+                      <p className="text-xs text-muted-foreground">Solved</p>
                     </div>
                   </div>
                 </div>
@@ -226,70 +296,86 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                           <div>
-                            <Label className="text-sm font-medium text-muted-foreground">First Name</Label>
-                            <p className="text-foreground font-medium">{user.firstName}</p>
+                            <Label className="text-sm font-medium text-muted-foreground">Name</Label>
+                            <p className="text-foreground font-medium">{user?.fullname}</p>
                           </div>
-                          <div>
+                          {/* <div>
                             <Label className="text-sm font-medium text-muted-foreground">Last Name</Label>
                             <p className="text-foreground font-medium">{user.lastName}</p>
-                          </div>
+                          </div> */}
                           <div>
                             <Label className="text-sm font-medium text-muted-foreground">Email</Label>
-                            <p className="text-foreground font-medium">{user.email}</p>
+                            <p className="text-foreground font-medium">{user?.email}</p>
                           </div>
                         </div>
                         <div className="space-y-4">
                           <div>
-                            <Label className="text-sm font-medium text-muted-foreground">Phone</Label>
-                            <p className="text-foreground font-medium">{user.phone}</p>
+                            <Label className="text-sm font-medium text-muted-foreground">Joined</Label>
+                            <p className="text-foreground font-medium">{user?.createdAt.split("T")[0]}</p>
                           </div>
-                          <div>
+                          {/* <div>
                             <Label className="text-sm font-medium text-muted-foreground">District</Label>
                             <p className="text-foreground font-medium">
                               {bangladeshDistricts.find((d) => d.value === user.district)?.label}
                             </p>
+                          </div> */}
+                        </div>
+                        <div className="md:col-span-2">
+                          <div className="grid grid-cols-4 gap-4 w-full mt-6 pt-6 border-t">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-primary">{issues.length}</p>
+                              <p className="text-xs text-muted-foreground">Reported</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-primary">{issues.filter((issue: any) => issue.status.toLowerCase() === 'panding').length}</p>
+                              <p className="text-xs text-muted-foreground">Panding</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-primary">{issues.filter((issue: any) => issue.status.toLowerCase() === 'in-progress').length}</p>
+                              <p className="text-xs text-muted-foreground">In progress </p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-green-600">{issues.filter((issue: any) => issue.status.toLowerCase() === 'resolved').length}</p>
+                              <p className="text-xs text-muted-foreground">Solved</p>
+                            </div>
                           </div>
                         </div>
-                        <div className="md:col-span-2">
-                          <Label className="text-sm font-medium text-muted-foreground">Address</Label>
-                          <p className="text-foreground font-medium">{user.address}</p>
-                        </div>
-                        <div className="md:col-span-2">
+                        {/* <div className="md:col-span-2">
                           <Label className="text-sm font-medium text-muted-foreground">Bio</Label>
                           <p className="text-foreground">{user.bio}</p>
-                        </div>
+                        </div> */}
                       </div>
                     ) : (
                       // Edit Mode
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor="firstName">First Name</Label>
+                            <Label htmlFor="fullname">Name</Label>
                             <Input
-                              id="firstName"
-                              value={editForm.firstName}
-                              onChange={(e) => handleInputChange("firstName", e.target.value)}
+                              id="fullname"
+                              value={editForm?.fullname}
+                              onChange={(e) => handleInputChange("fullname", e.target.value)}
                             />
                           </div>
-                          <div>
+                          {/* <div>
                             <Label htmlFor="lastName">Last Name</Label>
                             <Input
                               id="lastName"
                               value={editForm.lastName}
                               onChange={(e) => handleInputChange("lastName", e.target.value)}
                             />
-                          </div>
+                          </div> */}
                           <div>
                             <Label htmlFor="email">Email</Label>
                             <Input
                               id="email"
                               type="email"
-                              value={editForm.email}
+                              value={editForm?.email}
                               onChange={(e) => handleInputChange("email", e.target.value)}
                             />
                           </div>
                         </div>
-                        <div className="space-y-4">
+                        {/* <div className="space-y-4">
                           <div>
                             <Label htmlFor="phone">Phone</Label>
                             <Input
@@ -316,8 +402,8 @@ export default function ProfilePage() {
                               </SelectContent>
                             </Select>
                           </div>
-                        </div>
-                        <div className="md:col-span-2">
+                        </div> */}
+                        {/* <div className="md:col-span-2">
                           <Label htmlFor="address">Address</Label>
                           <Input
                             id="address"
@@ -333,7 +419,7 @@ export default function ProfilePage() {
                             onChange={(e) => handleInputChange("bio", e.target.value)}
                             rows={3}
                           />
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   </CardContent>
@@ -348,8 +434,8 @@ export default function ProfilePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockUserIssues.map((issue) => (
-                        <Card key={issue.id} className="border border-border/50">
+                      {issues.map((issue, index) => (
+                        <Card key={index} className="border border-border/50">
                           <CardContent className="p-4">
                             <div className="flex justify-between items-start mb-3">
                               <h3 className="font-semibold text-foreground">{issue.title}</h3>
@@ -371,7 +457,7 @@ export default function ProfilePage() {
                                 <strong>Location:</strong> {issue.location}
                               </p>
                               <p>
-                                <strong>Reported:</strong> {issue.reportedDate}
+                                <strong>Reported:</strong> {issue.postDate.split("T")[0]}
                               </p>
                             </div>
 
@@ -382,13 +468,18 @@ export default function ProfilePage() {
                               </span>
                               <span className="flex items-center gap-1">
                                 <MessageSquare className="h-4 w-4" />
-                                {issue.comments} comments
+                                {issue.comments.length} comments
                               </span>
                             </div>
 
                             <div className="flex gap-2 mt-4">
                               <Button size="sm" variant="outline" className="flex-1 bg-transparent">
-                                View Details
+                                <Link href={`/issue/${issue._id}`}>
+                                  View Details
+                                </Link>
+                              </Button>
+                              <Button onClick={() => handleDeleteIssue(issue._id)} size="sm" variant="outline" className="flex-1 bg-red-600/10 text-red-600 hover:bg-red-600/20 cursor-pointer">
+                                Delete
                               </Button>
                             </div>
                           </CardContent>
@@ -450,13 +541,13 @@ export default function ProfilePage() {
                       <div className="border-t pt-6">
                         <h3 className="text-lg font-semibold text-foreground mb-4">Danger Zone</h3>
                         <div className="space-y-3">
-                          <Button variant="outline" className="w-full justify-start bg-transparent">
+                          <Button variant="outline" className="w-full justify-center bg-transparent cursor-pointer">
                             Change Password
                           </Button>
-                          <Button variant="outline" className="w-full justify-start bg-transparent">
+                          {/* <Button variant="outline" className="w-full justify-start bg-transparent">
                             Download My Data
-                          </Button>
-                          <Button variant="destructive" className="w-full justify-start">
+                          </Button> */}
+                          <Button variant="destructive" className="w-full justify-center cursor-pointer" onClick={() => handleDeleteUser(user?._id!)}>
                             Delete Account
                           </Button>
                         </div>

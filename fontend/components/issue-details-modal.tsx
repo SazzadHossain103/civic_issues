@@ -5,11 +5,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, MessageSquare, MapPin, Calendar, User, Send } from "lucide-react"
+import { Eye, MessageSquare, MapPin, Calendar, User, Send, User2, Trash2 } from "lucide-react"
 import { ThreadModal } from "./thread-modal"
 import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useGlobalStore } from "@/components/globalVariable"
+import { id } from "date-fns/locale"
 
 
 interface UserRef {
@@ -108,6 +109,35 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
       alert("Could not post comment, please try again.");
     }
   }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/issues/commentadmin`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${adminToken}`, // token from your global store (Zustand or Context)
+        },
+        body: JSON.stringify({ issueId: issue._id, commentId}),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert("Could not delete comment, please try again. resnot ok");
+        throw new Error(data.message || "Failed to delete comment");
+      }
+      alert("Comment deleted successfully");
+      console.log("Comment deleted:", data);
+      // Update UI (remove deleted comment)
+      setComments((prev:any) => prev.filter((comment:any) => comment._id !== commentId));
+    } catch (error) {
+      alert("Could not delete comment, please try again.");
+      console.error("Error deleting comment:", error);
+    }
+  }
+
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -225,14 +255,10 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
             {comments && comments.map((comment, index) => (
               <div key={index} className="flex items-start gap-3">
                 <Avatar>
-                  <AvatarImage src={comment.avatar || "/placeholder.svg"} />
+                  {/* <AvatarImage src={comment.avatar || "/placeholder.svg"} /> */}
+                  {/* <User2 className="h-8 w-8 text-gray-500" /> */}
                   <AvatarFallback>
-                    {(comment.commentBy?.fullname
-                      ? comment.commentBy.fullname
-                        .split(" ")
-                        .map((n: string) => n[0])
-                        .join("")
-                      : "NA")}
+                    {(comment.commentBy?.fullname[0])}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
@@ -244,6 +270,9 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
                       </Badge>
                     )}
                     <span className="text-sm text-gray-500">{comment.commentAt.split("T")[0]}</span>
+                    <Button onClick={()=> handleDeleteComment(comment._id)} variant="ghost" size="sm" className="p-0 ml-auto cursor-pointer">
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </div>
                   <div
                     className={`p-3 rounded-lg ${

@@ -675,7 +675,7 @@ export default function AdaminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">Admin Management</h3>
                 <div className="flex gap-2">
-                  {admin?.role === "Super Admin" && <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
+                  {admin?.role === "Super Admin" && <Button className="cursor-pointer" size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
                     Add New Admin
                   </Button>}
                 </div>
@@ -719,12 +719,12 @@ export default function AdaminDashboard() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 bg-transparent"
+                          className="flex-1 bg-transparent cursor-pointer"
                           onClick={() => handleEditPermissions(item)}
                         >
                           Edit Permissions
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item._id)}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item._id)} className="cursor-pointer">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>}
@@ -892,11 +892,11 @@ export default function AdaminDashboard() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1">
+                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1 cursor-pointer">
                       View Details
                     </Button>
                     <Select value={issue.status} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32 cursor-pointer">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

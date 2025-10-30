@@ -188,7 +188,7 @@ export default function BrowseIssuesPage() {
           {filteredIssues.map((issue: any) => (
             <Card key={issue._id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-muted">
-                <img src={issue.images[0] || "/placeholder.svg"} alt={issue.title} className="w-full h-full object-cover" />
+                <img src={issue.images[0] || "/placeholder.svg"} alt={issue.title} className="w-full max-h-[220px] object-cover" />
               </div>
               <CardHeader>
                 <div className="flex justify-between items-start">

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Camera, Users, TrendingUp, AlertTriangle, Zap, Droplets, Trash2 } from "lucide-react"
+import { MapPin, Camera, Users, TrendingUp, AlertTriangle, Zap, Droplets, Trash2, CheckCircle } from "lucide-react"
 import Link from "next/link"
 // import { useState, useEffect } from "react"
 import { getIssues } from "@/components/getData"
@@ -49,8 +49,8 @@ export default async function HomePage() {
 
   const stats = [
     { label: "Total Reports", value: recentIssues.data.length, icon: AlertTriangle },
-    { label: "Resolved Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'resolved').length , icon: TrendingUp },
-    { label: "In progress Issues", value: recentIssues.data.filter((issue:any)=> issue.status === 'in-progress').length, icon: Users },
+    { label: "Resolved Issues", value: recentIssues.data.filter((issue:any)=> issue.status.toLowerCase() === 'resolved').length , icon: CheckCircle },
+    { label: "In progress Issues", value: recentIssues.data.filter((issue:any)=> issue.status.toLowerCase() === 'in-progress').length, icon: TrendingUp },
     { label: "Cities Covered", value: "64", icon: MapPin },
   ]
 

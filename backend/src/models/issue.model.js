@@ -15,7 +15,7 @@ const issueSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "In Progress", "Resolved", "Rejected", "Under Review"],
+    enum: ["Pending", "In-progress", "Resolved"],
     default: "Pending"
   },
   votes: { type: Number, default: 0 },

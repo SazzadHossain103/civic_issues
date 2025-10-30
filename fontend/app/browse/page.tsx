@@ -103,7 +103,7 @@ export default function BrowseIssuesPage() {
     switch (status) {
       case "Pending":
         return "destructive"
-      case "In Progress":
+      case "In-progress":
         return "secondary"
       case "Resolved":
         return "default"
@@ -165,7 +165,7 @@ export default function BrowseIssuesPage() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in progress">In Progress</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>

@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -16,18 +18,24 @@ export default function RegisterPage() {
       password: formData.get("password"),
     };
 
-    const res = await fetch("http://localhost:5000/api/users/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      alert("Registration successful!");
-      // Optionally redirect or clear form
-    } else {
-      const error = await res.json();
-      alert(error.message || "Registration failed!");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+  
+      if (res.ok) {
+        alert("Registration successful!");
+        router.push('/login');
+        // Optionally redirect or clear form
+      } else {
+        const error = await res.json();
+        alert(error.message || "Registration failed!");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("An error occurred. Please try again later.");
     }
   }
   return (

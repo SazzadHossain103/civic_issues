@@ -204,17 +204,17 @@ export function IssueDetailsModal({ issue, isOpen, onClose, onStatusUpdate }: Is
             <div className="border-t pt-4">
               <h3 className="font-semibold mb-3">Update Status</h3>
               <div className="flex gap-3">
-                <Select value={issue.status.toLowerCase()} onValueChange={(value) => onStatusUpdate(issue._id, value)}>
+                <Select value={issue.status} onValueChange={(value) => onStatusUpdate(issue._id, value)}>
                   <SelectTrigger className="w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="In-progress">In Progress</SelectItem>
+                    <SelectItem value="Resolved">Resolved</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">Save Changes</Button>
+                {/* <Button variant="outline">Save Changes</Button> */}
               </div>
             </div>
 

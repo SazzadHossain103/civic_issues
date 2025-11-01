@@ -190,3 +190,42 @@ export const deleteUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, null, "User and related data deleted successfully"));
 });
+
+// Update user password
+export const updateUserPassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword, id } = req.body;
+  const user = await User.findById(id);
+  // console.log("Request to update password for user ID:", req.user._id);
+  // console.log("Updating password for user ID:", id);
+  // console.log("Current Password:", currentPassword);
+  // console.log("New Password:", newPassword);
+  if (!user) {
+    throw new ApiError("User not found", 404);
+  }
+  const isPasswordValid = await user.isPasswordMatch(currentPassword);
+  if (!isPasswordValid) {
+    throw new ApiError("Current password is incorrect", 401);
+  }
+  user.password = newPassword;
+  await user.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Password updated successfully"));
+});
+
+// update user profile
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const { fullname, email, id } = req.body;
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError("User not found", 404);
+  }
+  user.fullname = fullname || user.fullname;
+  user.email = email || user.email;
+  await user.save();
+  const updatedUser = await User.findById(req.user._id).select("-password -refreshToken");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Profile updated successfully"));
+});

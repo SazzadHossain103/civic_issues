@@ -19,6 +19,7 @@ import { getIssues, getUsers } from "@/components/getData"
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 
+
 type JwtPayload = { exp: number };
 
 
@@ -194,6 +195,7 @@ export default function AdaminDashboard() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [priorityFilter, setPriorityFilter] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState("all")
   const [activeView, setActiveView] = useState("dashboard")
   const router = useRouter();
 
@@ -576,7 +578,8 @@ export default function AdaminDashboard() {
             issue.location.toLowerCase().includes(searchTerm.toLowerCase())
           const matchesStatus = statusFilter === "all" || issue.status.toLowerCase() === statusFilter
           const matchesPriority = priorityFilter === "all" || issue.priority.toLowerCase() === priorityFilter
-          return matchesSearch && matchesStatus && matchesPriority
+          const matchesCategory = selectedCategory === "all" || issue.category.toLowerCase() === selectedCategory
+          return matchesSearch && matchesStatus && matchesPriority && matchesCategory
         })
     }
   }
@@ -675,7 +678,7 @@ export default function AdaminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">Admin Management</h3>
                 <div className="flex gap-2">
-                  {admin?.role === "Super Admin" && <Button size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
+                  {admin?.role === "Super Admin" && <Button className="cursor-pointer" size="sm" onClick={() => setIsAddAdminModalOpen(true)}>
                     Add New Admin
                   </Button>}
                 </div>
@@ -719,12 +722,12 @@ export default function AdaminDashboard() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 bg-transparent"
+                          className="flex-1 bg-transparent cursor-pointer"
                           onClick={() => handleEditPermissions(item)}
                         >
                           Edit Permissions
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item._id)}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteAdmin(item._id)} className="cursor-pointer">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>}
@@ -742,7 +745,7 @@ export default function AdaminDashboard() {
       <>
         {/* Stats Cards - Show only on dashboard */}
         {activeView === "dashboard" && (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -808,8 +811,8 @@ export default function AdaminDashboard() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 ">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -820,8 +823,21 @@ export default function AdaminDashboard() {
                   />
                 </div>
               </div>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full md:w-auto ">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="road">Road Issues</SelectItem>
+                  <SelectItem value="drainage">Drainage</SelectItem>
+                  <SelectItem value="electricity">Electricity</SelectItem>
+                  <SelectItem value="water">Water Supply</SelectItem>
+                  <SelectItem value="waste">Waste Management</SelectItem>
+                </SelectContent>
+              </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="w-full md:w-auto">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -832,7 +848,7 @@ export default function AdaminDashboard() {
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="w-full md:w-auto">
                   <SelectValue placeholder="Filter by priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -892,11 +908,11 @@ export default function AdaminDashboard() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1">
+                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(issue)} className="flex-1 cursor-pointer">
                       View Details
                     </Button>
                     <Select value={issue.status} onValueChange={(value) => updateIssueStatus(issue._id, value)}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32 cursor-pointer">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -917,7 +933,7 @@ export default function AdaminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <AdminNavbar adminName={admin?.fullname || "Admin"} onLogout={handleAdminLogout} />
+      <AdminNavbar adminName={admin?.fullname || "Admin"} onLogout={handleAdminLogout} activeItem={activeView} onItemSelect={setActiveView} />
 
       <div className="flex flex-1">
         <AdminSidebar activeItem={activeView} onItemSelect={setActiveView} />

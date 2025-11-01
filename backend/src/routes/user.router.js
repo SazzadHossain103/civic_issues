@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, loginUser, logoutUser, getAllUsers, deleteUser } from "../controllers/user.contorller.js";
+import { registerUser, loginUser, logoutUser, getAllUsers, deleteUser, updateUserProfile, updateUserPassword } from "../controllers/user.contorller.js";
 import { upload } from "../middlewares/multer.miiddleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -16,5 +16,7 @@ router.route("/delete").delete(deleteUser);
 router.route("/login").post(loginUser);
 router.route("/list").get(getAllUsers);
 router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/update-profile").put(verifyJWT, upload.none(), updateUserProfile);
+router.route("/update-password").put(verifyJWT,upload.none(), updateUserPassword);
 
 export default router;

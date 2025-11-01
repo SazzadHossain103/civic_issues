@@ -15,7 +15,7 @@ import { useGlobalStore } from "@/components/globalVariable"
 import { getIssues } from "@/components/getData"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-
+import ChangePasswordModal from "@/components/change-password-modal"
 
 // Mock user data - in real app this would come from authentication/database
 const mockUser = {
@@ -83,11 +83,13 @@ const bangladeshDistricts = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isLoggedIn, logout } = useGlobalStore();
+  const { user, isLoggedIn, token, logout } = useGlobalStore();
   // const [user, setUser] = useState(mockUser)
   const [issues, setIssues] = useState<any[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState(user)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -191,6 +193,66 @@ export default function ProfilePage() {
     }
   }
 
+  // const handlePasswordChange = (currentPassword: string, newPassword: string, confirmPassword: string) => {
+  //   // In a real app, you would send this to your backend API
+  //   console.log("Changing password:", {
+  //     currentPassword,
+  //     newPassword,
+  //     confirmPassword,
+  //   })
+
+  //   // Simulate successful password change
+  //   setPasswordMessage({
+  //     type: "success",
+  //     text: "Password updated successfully!",
+  //   })
+  //   setIsPasswordModalOpen(false)
+
+  //   // Clear message after 3 seconds
+  //   setTimeout(() => {
+  //     setPasswordMessage({ type: "", text: "" })
+  //   }, 3000)
+  // }
+
+  const handlePasswordChange = async (
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  ) => {
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: "error", text: "Passwords do not match!" })
+      return
+    }
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/update-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword, id: user?._id  }),
+      })
+
+      const data = await res.json()
+      console.log("Response from password update: ", data);
+      if (!res.ok) throw new Error(data.message || "Failed to update password")
+      
+      logout();
+      router.push("/login");
+
+      setPasswordMessage({ type: "success", text: "Password updated successfully!" })
+      setIsPasswordModalOpen(false)
+
+      setTimeout(() => {
+        setPasswordMessage({ type: "", text: "" })
+      }, 3000)
+    } catch (error: any) {
+      setPasswordMessage({ type: "error", text: error.message })
+    }
+  }
+
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -198,6 +260,15 @@ export default function ProfilePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-serif text-foreground">My Profile</h1>
           <p className="text-muted-foreground mt-2">Manage your account and view your civic contributions</p>
+          {passwordMessage.text && (
+            <div
+              className={`mt-4 p-3 rounded text-sm font-medium ${
+                passwordMessage.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
+              {passwordMessage.text}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -254,15 +325,15 @@ export default function ProfilePage() {
           <div className="lg:col-span-2">
             <Tabs defaultValue="profile" className="space-y-6">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="profile" className="flex items-center gap-2">
+                <TabsTrigger value="profile" className="flex items-center gap-2 cursor-pointer">
                   <User className="h-4 w-4" />
                   Profile
                 </TabsTrigger>
-                <TabsTrigger value="issues" className="flex items-center gap-2">
+                <TabsTrigger value="issues" className="flex items-center gap-2 cursor-pointer">
                   <FileText className="h-4 w-4" />
                   My Issues
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
+                <TabsTrigger value="settings" className="flex items-center gap-2 cursor-pointer">
                   <Settings className="h-4 w-4" />
                   Settings
                 </TabsTrigger>
@@ -274,7 +345,7 @@ export default function ProfilePage() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle className="font-serif">Personal Information</CardTitle>
-                      {!isEditing ? (
+                      {/* {!isEditing ? (
                         <Button onClick={() => setIsEditing(true)} variant="outline">
                           Edit Profile
                         </Button>
@@ -287,7 +358,7 @@ export default function ProfilePage() {
                             Save Changes
                           </Button>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -541,7 +612,11 @@ export default function ProfilePage() {
                       <div className="border-t pt-6">
                         <h3 className="text-lg font-semibold text-foreground mb-4">Danger Zone</h3>
                         <div className="space-y-3">
-                          <Button variant="outline" className="w-full justify-center bg-transparent cursor-pointer">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start bg-transparent cursor-pointer"
+                            onClick={() => setIsPasswordModalOpen(true)}
+                          >
                             Change Password
                           </Button>
                           {/* <Button variant="outline" className="w-full justify-start bg-transparent">
@@ -560,6 +635,11 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onSubmit={handlePasswordChange}
+      />
     </div>
   )
 }

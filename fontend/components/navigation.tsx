@@ -158,7 +158,7 @@ export function Navigation() {
                           <div className="space-y-2">
                             <Link
                               href="/profile"
-                              className="flex items-center text-foreground hover:text-primary transition-colors py-2 px-4 rounded-md hover:bg-accent"
+                              className="flex items-center text-foreground hover:text-primary transition-colors py-2 px-4 rounded-md hover:bg-accent cursor-pointer"
                               onClick={closeMobileMenu}
                             >
                               <User className="mr-2 h-4 w-4" />
@@ -169,7 +169,7 @@ export function Navigation() {
                                 handleLogout()
                                 closeMobileMenu()
                               }}
-                              className="flex items-center text-foreground hover:text-primary transition-colors py-2 px-4 rounded-md hover:bg-accent w-full text-left"
+                              className="flex items-center cursor-pointer text-foreground hover:text-primary transition-colors py-2 px-4 rounded-md hover:bg-accent w-full text-left"
                             >
                               <LogOut className="mr-2 h-4 w-4" />
                               Logout
@@ -178,12 +178,12 @@ export function Navigation() {
                         ) : (
                           <div className="space-y-2">
                             <Link href="/login" onClick={closeMobileMenu}>
-                              <Button variant="outline" className="w-full bg-transparent">
+                              <Button variant="outline" className="w-full bg-transparent cursor-pointer">
                                 Login
                               </Button>
                             </Link>
                             <Link href="/register" onClick={closeMobileMenu}>
-                              <Button className="w-full">Register</Button>
+                              <Button className="w-full cursor-pointer">Register</Button>
                             </Link>
                           </div>
                         )}
@@ -197,7 +197,7 @@ export function Navigation() {
                 {isLoggedIn ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
                         <Avatar className="h-8 w-8 border-slate-500">
                           {/* <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Profile" /> */}
                           <AvatarFallback>
